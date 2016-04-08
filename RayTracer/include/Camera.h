@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "Base.h"
+#include "Photon.h"
 
 class Camera
 {

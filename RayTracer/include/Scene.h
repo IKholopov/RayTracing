@@ -6,7 +6,11 @@
 class Scene
 {
     public:
-        Scene(Box size);
+        Scene(Box size, Camera camera);
+    private:
+        IView* view;
+        Camera camera_;
+
 
 };
 

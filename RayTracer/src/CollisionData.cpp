@@ -1,4 +1,5 @@
 #include "CollisionData.h"
 
-CollisionData::CollisionData(bool isCollide, Color color):IsCollide(isCollide), PixelColor(color)
+CollisionData::CollisionData(bool isCollide, Color color, Point collisionPoint, Point collisionNormal):
+    IsCollide(isCollide), PixelColor(color), CollisionPoint(collisionPoint), CollisionNormal(collisionNormal)
 {}

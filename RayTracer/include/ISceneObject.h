@@ -3,13 +3,14 @@
 
 #include "Base.h"
 #include "CollisionData.h"
+#include "Photon.h"
 
 class ISceneObject
 {
     public:
-        virtual ~ISceneObject();
+        virtual ~ISceneObject() {};
         virtual Box GetBoundingBox() = 0;
-        virtual CollisionData GetCollision() = 0;
+        virtual CollisionData* GetCollision(Photon photon) = 0;
 };
 
 #endif

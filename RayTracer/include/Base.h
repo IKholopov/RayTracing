@@ -22,6 +22,21 @@ struct Point
         float X;
         float Y;
         float Z;
+
+        Point operator -(Point& b);
+        Point operator + (Point& a);
+        Point operator * (float a);
+        Point operator * (int a);
+        Point operator * (unsigned int a);
+};
+
+struct Plane
+{
+        Plane(Point x1y1z1, Point x2y2z2, Point x3y3z3, Point x4y4z4);
+        Point x1y1z1;
+        Point x2y2z2;
+        Point x3y3z3;
+        Point x4y4z4;
 };
 
 class Box
