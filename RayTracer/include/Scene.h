@@ -2,16 +2,20 @@
 #define SCENE_H
 
 #include "Base.h"
+#include "Camera.h"
+#include "IView.h"
+#include "IGeometryHierarchy.h"
 
 class Scene
 {
     public:
-        Scene(Box size, Camera camera);
+        Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy);
+
+        void RenderScene();
     private:
-        IView* view;
+        IGeometryHierarchy* hierarchy_;
+        IView* view_;
         Camera camera_;
-
-
 };
 
 #endif

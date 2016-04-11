@@ -9,6 +9,7 @@
 struct CollisionData
 {
     public:
+        CollisionData(bool isCollide);
         CollisionData(bool isCollide, Color color, Point collisionPoint, Point collisionNormal);
         bool IsCollide;
         Color PixelColor;

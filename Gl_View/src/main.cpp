@@ -2,11 +2,12 @@
 #include <cstdlib>
 
 #include "GLView.h"
+#include "Kernel.h"
 
 const unsigned int W = 640;
 const unsigned int H = 480;
 
-GLView view(W, H);
+GLView* view;
 
 void display()
 {
@@ -14,14 +15,17 @@ void display()
     glClear( GL_COLOR_BUFFER_BIT );
 
 
-
-    glDrawPixels( W, H, GL_RGB, GL_FLOAT, view.GetData());
+    glDrawPixels( W, H, GL_RGB, GL_FLOAT, view->GetData());
 
     glutSwapBuffers();
+    glutPostRedisplay ();
 }
 
 int main( int argc, char **argv )
 {
+    Kernel kernel;
+    view = (GLView*)kernel.GetView();
+    kernel.Run();
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
     glutInitWindowSize( W, H );

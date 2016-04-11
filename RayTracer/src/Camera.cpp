@@ -6,10 +6,20 @@ Camera::Camera(Point point, unsigned int width, unsigned int height, Plane scree
 
 }
 
+unsigned int Camera::GetWidth()
+{
+    return resolution_.Width;
+}
+
+unsigned int Camera::GetHeight()
+{
+    return resolution_.Height;
+}
+
 Photon Camera::GetPhotonForPixel(unsigned int x, unsigned int y)
 {
-    auto xEdge = (screen_.x2y2z2 - screen_.x1y1z1)*x;
-    auto yEdge = ((screen_.x3y3z3 - screen_.x1y1z1)*y);
-    auto screenPos = screen_.x1y1z1 + xEdge + yEdge;
-    return Photon(screenPos, screenPos - viewpoint_);
+    auto xEdge = (screen_.x4y4z4 - screen_.x3y3z3)*float(x)*(1.0/resolution_.Width);
+    auto yEdge = ((screen_.x1y1z1 - screen_.x3y3z3)*float(y)*(1.0/resolution_.Height));
+    auto screenPos = screen_.x3y3z3 + xEdge + yEdge;
+    return Photon(viewpoint_, screenPos - viewpoint_);
 }

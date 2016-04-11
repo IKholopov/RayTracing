@@ -17,12 +17,12 @@ GLView::~GLView()
     delete[] data;
 }
 
-void GLView::UpdatePixel(unsigned int x, unsigned int y, Point color)
+void GLView::UpdatePixel(unsigned int x, unsigned int y, Color color)
 {
     std::unique_lock<std::mutex> lock_gurad(matrixLock_);
-    data[3*(resolution_.Width*y + x) + 0] = color.X;
-    data[3*(resolution_.Width*y + x) + 1] = color.Y;
-    data[3*(resolution_.Width*y + x) + 2] = color.Z;
+    data[3*(resolution_.Width*y + x) + 0] = color.R;
+    data[3*(resolution_.Width*y + x) + 1] = color.G;
+    data[3*(resolution_.Width*y + x) + 2] = color.B;
 }
 
 Resolution GLView::GetResolution() const

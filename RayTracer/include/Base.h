@@ -1,6 +1,8 @@
 #ifndef BASE_H
 #define BASE_H
 
+#include <ostream>
+
 struct Resolution
 {
         Resolution(unsigned int width, unsigned int height);
@@ -10,6 +12,7 @@ struct Resolution
 
 struct Color
 {
+        Color();
         Color(float r, float g, float b);
         float R;
         float G;
@@ -18,16 +21,31 @@ struct Color
 
 struct Point
 {
+        Point();
         Point(float x, float y, float z);
         float X;
         float Y;
         float Z;
 
+        float Length();
+        Point Normalized();
+
         Point operator -(Point& b);
+        Point operator -(Point&& b);
         Point operator + (Point& a);
+        Point operator + (Point&& a);
         Point operator * (float a);
+        Point operator * (double a);
         Point operator * (int a);
         Point operator * (unsigned int a);
+        float operator * (const Point& b);
+        float operator * (Point&& b);
+
+        friend std::ostream& operator<<( std::ostream& output, const Point& p)
+        {
+            output << p.X << " " << p.Y << " " << p.Z;
+            return output;
+        }
 };
 
 struct Plane
@@ -42,17 +60,21 @@ struct Plane
 class Box
 {
     public:
-        Box(Point x1y1z1, Point x1y1z2, Point x1y2z1, Point x1y2z2,
-            Point x2y1z1, Point x2y1z2, Point x2y2z1,Point x2y2z2);
+        Box();
+        Box(float xMax, float xMin, float yMax, float yMin, float zMax, float zMin);
 
-        Point x1y1z1;
-        Point x1y1z2;
-        Point x1y2z1;
-        Point x1y2z2;
-        Point x2y1z1;
-        Point x2y1z2;
-        Point x2y2z1;
-        Point x2y2z2;
+        float XMax;
+        float XMin;
+        float YMax;
+        float YMin;
+        float ZMax;
+        float ZMin;
+
+        float XLength();
+        float YLength();
+        float ZLength();
 };
+
+bool IsFloatZero(float a);
 
 #endif

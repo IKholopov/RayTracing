@@ -12,7 +12,7 @@ class GLView:public IView
         GLView(unsigned int width, unsigned int height);
         ~GLView();
 
-        void UpdatePixel(unsigned int x, unsigned int y, Point color);
+        void UpdatePixel(unsigned int x, unsigned int y, Color color);
 
         const float* GetData() const;
         Resolution GetResolution() const;
