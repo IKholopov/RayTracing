@@ -144,17 +144,17 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
 
     float lMin = GetBoxValueMinFromAxis(minLeft->first, axis);
     float rMin = GetBoxValueMinFromAxis(minRight->first, axis);
-    leftObjects = 0;
+    leftObjects = 1;
     rightObjects = std::distance(minLeft, minRight) + 1 - leftObjects;
-    for(auto it = minLeft; it != minRight; ++it)
+    for(auto it = minLeft + 1; it != minRight; ++it)
     {
         leftObjects++;
         rightObjects--;
         assert(rightObjects > 0);
         bool allowed = true;
-        for(auto jt = it; jt != minRight; ++jt)
+        for(auto jt = it; jt != minLeft; --jt)
         {
-            if(GetBoxValueMinFromAxis((jt+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+            if(GetBoxValueMinFromAxis((it)->first, axis) < GetBoxValueMaxFromAxis((jt - 1)->first, axis))
             {
                 allowed = false;
                 break;
@@ -162,7 +162,7 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
         }
         if(!allowed)
             continue;
-        float split = (GetBoxValueMinFromAxis((it+1)->first, axis) + GetBoxValueMaxFromAxis(it->first, axis)) / 2;
+        float split = (GetBoxValueMinFromAxis((it-1)->first, axis) + GetBoxValueMaxFromAxis(it->first, axis)) / 2;
         float sah = emptySpaceCost_ + leftObjects * (split - lMin) + rightObjects * (rMin - split);
         if(sah <= optimalSAH)
         {
