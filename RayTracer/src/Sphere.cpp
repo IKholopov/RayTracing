@@ -30,7 +30,7 @@ CollisionData*Sphere::GetCollision(Photon photon)
     auto sinus = std::sqrt(1 - heightLen2 / radius_ / radius_);
     if(centDist.Length() > radius_)
     {
-        intersecPoint = heightPoint - photon.Direction() * sinus;
+        intersecPoint = heightPoint - photon.Direction().Normalized() * sinus * radius_;
         intersecNormal = (intersecPoint - position_).Normalized();
         if(outterMaterial_== nullptr)
             return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);
@@ -38,7 +38,7 @@ CollisionData*Sphere::GetCollision(Photon photon)
     }
     else
     {
-        intersecPoint = heightPoint + photon.Direction() * sinus ;
+        intersecPoint = heightPoint + photon.Direction().Normalized() * sinus ;
         intersecNormal = (intersecPoint - position_).Normalized() * -1;
         if(innerMaterial_== nullptr)
             return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);

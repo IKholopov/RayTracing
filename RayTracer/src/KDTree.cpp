@@ -403,16 +403,16 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
         CollisionData* collision = (*obj)->GetCollision(photon);
         if(collision->IsCollide)
         {
-            if(obj == objects->begin() + 1)
-                int a = 0;
-            if(obj == objects->begin() + 183)
-                int a = 0;
             auto newDist = (collision->CollisionPoint - photon.Position()).Length();
             auto oldDist = (minCollision->CollisionPoint- photon.Position()).Length();
             if(! minCollision->IsCollide || newDist < oldDist)
             {
+
                 delete minCollision;
                 minCollision = collision;
+            }
+            else {
+                delete collision;
             }
         }
         else
