@@ -122,7 +122,7 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
         bool allowed = true;
         for(auto jt = it; jt != maxRight; ++jt)
         {
-            if(GetBoxValueMinFromAxis((jt+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+            if(GetBoxValueMinFromAxis((jt+1)->first, axis) <= GetBoxValueMaxFromAxis((it)->first, axis))
             {
                 allowed = false;
                 break;
@@ -144,17 +144,17 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
 
     float lMin = GetBoxValueMinFromAxis(minLeft->first, axis);
     float rMin = GetBoxValueMinFromAxis(minRight->first, axis);
-    leftObjects = 1;
-    rightObjects = std::distance(minLeft, minRight) + 1 - leftObjects;
-    for(auto it = minLeft + 1; it != minRight; ++it)
+    rightObjects = 0;
+    leftObjects = std::distance(minLeft, minRight) + 1 - rightObjects;
+    for(auto it = minRight; it != minLeft; --it)
     {
-        leftObjects++;
-        rightObjects--;
-        assert(rightObjects > 0);
+        leftObjects--;
+        rightObjects++;
+        assert(leftObjects > 0);
         bool allowed = true;
         for(auto jt = it; jt != minLeft; --jt)
         {
-            if(GetBoxValueMinFromAxis((it)->first, axis) < GetBoxValueMaxFromAxis((jt - 1)->first, axis))
+            if(GetBoxValueMinFromAxis((it)->first, axis) <= GetBoxValueMaxFromAxis((jt - 1)->first, axis))
             {
                 allowed = false;
                 break;
@@ -403,9 +403,17 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
         CollisionData* collision = (*obj)->GetCollision(photon);
         if(collision->IsCollide)
         {
-            if(! minCollision->IsCollide || (collision->CollisionPoint - photon.Position()).Length() <
-                    (minCollision->CollisionPoint- photon.Position()).Length())
+            if(obj == objects->begin() + 1)
+                int a = 0;
+            if(obj == objects->begin() + 183)
+                int a = 0;
+            auto newDist = (collision->CollisionPoint - photon.Position()).Length();
+            auto oldDist = (minCollision->CollisionPoint- photon.Position()).Length();
+            if(! minCollision->IsCollide || newDist < oldDist)
+            {
+                delete minCollision;
                 minCollision = collision;
+            }
         }
         else
         {
