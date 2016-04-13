@@ -4,6 +4,7 @@
 #include "Base.h"
 #include "CollisionData.h"
 #include "Photon.h"
+#include "IMaterial.h"
 
 class ISceneObject
 {

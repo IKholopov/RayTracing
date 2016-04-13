@@ -4,12 +4,13 @@
 #include <string>
 
 #include "Scene.h"
+#include "IView.h"
 
 class ISerializer
 {
     public:
-        virtual ~ISerializer() = 0;
-        Scene* LoadScene(std::string filepath) = 0;
+        virtual ~ISerializer() {};
+        virtual Scene* LoadScene(std::string filepath, IView* view) = 0;
 };
 
 #endif

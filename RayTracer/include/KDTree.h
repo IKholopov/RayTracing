@@ -8,6 +8,7 @@ class KDTree: public IGeometryHierarchy
 {
     public:
         KDTree(float emptySpaceCost, float maxNodeCost);
+        void Initialize(std::vector<ISceneObject*>& objects);
     private:
         enum Axis{ A_X, A_Y, A_Z};
         struct KDNode{
@@ -22,7 +23,6 @@ class KDTree: public IGeometryHierarchy
             std::vector<ISceneObject*> object;
         };
 
-        void Initialize(std::vector<ISceneObject*>& objects);
         KDNode* DivideAndBuild(Axis axis, std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxLeft,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxRight,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,

@@ -4,19 +4,19 @@
 #include <string>
 #include <thread>
 
-#include "Scene.h"
+#include "ISerializer.h"
 
 class Kernel
 {
     public:
-        Kernel();
-        Kernel(std::string configFilePath);
+        Kernel(IView* view);
+        Kernel(IView* view, ISerializer* serializer, std::string sceneFilePath);
         ~Kernel();
         void Run();
         void RunScene();
-        IView* GetView();
     private:
         IView* view_;
+        Scene* scene_;
         std::thread* thr;
 };
 

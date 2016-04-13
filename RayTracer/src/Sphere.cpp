@@ -2,7 +2,8 @@
 
 #include <cmath>
 
-Sphere::Sphere(float radius, Point position, IMaterial* material):radius_(radius), position_(position), material_(material)
+Sphere::Sphere(float radius, Point position, IMaterial* outterMaterial, IMaterial* innerMaterial):radius_(radius), position_(position),
+    outterMaterial_(outterMaterial), innerMaterial_(innerMaterial)
 {
 }
 
@@ -18,7 +19,8 @@ Box Sphere::GetBoundingBox()
 CollisionData*Sphere::GetCollision(Photon photon)
 {
     auto centDist = position_ - photon.Position();
-    auto heightLen2 = centDist*centDist - std::pow(centDist * photon.Direction().Normalized(), 2);
+    auto proj = centDist * photon.Direction().Normalized();
+    auto heightLen2 = centDist*centDist - std::pow(proj, 2);
     if(heightLen2 > radius_*radius_)
         return new CollisionData(false);
     Point intersecPoint(0, 0, 0);
@@ -30,11 +32,26 @@ CollisionData*Sphere::GetCollision(Photon photon)
     {
         intersecPoint = heightPoint - photon.Direction() * sinus;
         intersecNormal = (intersecPoint - position_).Normalized();
+        if(outterMaterial_== nullptr)
+            return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);
+        return new CollisionData(true, outterMaterial_->GetSelfColor(), intersecPoint, intersecNormal);
     }
     else
     {
         intersecPoint = heightPoint + photon.Direction() * sinus ;
         intersecNormal = (intersecPoint - position_).Normalized() * -1;
+        if(innerMaterial_== nullptr)
+            return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);
+        return new CollisionData(true, innerMaterial_->GetSelfColor(), intersecPoint, intersecNormal);
     }
-    return new CollisionData(true, material_->GetSelfColor(), intersecPoint, intersecNormal);
+}
+
+void Sphere::SetOutterMaterial(IMaterial* material)
+{
+    this->outterMaterial_ = material;
+}
+
+void Sphere::SetInnerMaterial(IMaterial* material)
+{
+    this->innerMaterial_ = material;
 }

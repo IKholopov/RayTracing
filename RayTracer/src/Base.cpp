@@ -62,6 +62,19 @@ float Point::operator *(Point&& b)
     return this->X * b.X + this->Y * b.Y + this->Z * b.Z;
 }
 
+Point Point::operator ^(const Point& b)
+{
+    return Point(this->Y * b.Z - b.Y * this->Z,
+                 this->Z * b.X - b.Z * this->X,
+                 this->X * b.Y - b.X * this->Y);
+}
+Point Point::operator ^(Point&& b)
+{
+    return Point(this->Y * b.Z - b.Y * this->Z,
+                 this->Z * b.X - b.Z * this->X,
+                 this->X * b.Y - b.X * this->Y);
+}
+
 Point Point::operator - (Point& b)
 {
     return Point(this->X - b.X, this->Y - b.Y, this->Z - b.Z);
@@ -101,6 +114,7 @@ float Box::ZLength()
 
 bool IsFloatZero(float a)
 {
-    if(a < 1e-6)
+    if(std::fabs(a) < 1e-6)
         return true;
+    return false;
 }

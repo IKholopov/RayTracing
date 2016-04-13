@@ -2,6 +2,7 @@
 #define BASE_H
 
 #include <ostream>
+#include <istream>
 
 struct Resolution
 {
@@ -40,11 +41,18 @@ struct Point
         Point operator * (unsigned int a);
         float operator * (const Point& b);
         float operator * (Point&& b);
+        Point operator ^(const Point& b);
+        Point operator ^ (Point&& b);
 
         friend std::ostream& operator<<( std::ostream& output, const Point& p)
         {
             output << p.X << " " << p.Y << " " << p.Z;
             return output;
+        }
+        friend std::istream& operator>>( std::istream& input, Point& p)
+        {
+            input >> p.X >> p.Y >> p.Z;
+            return input;
         }
 };
 

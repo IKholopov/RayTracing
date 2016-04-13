@@ -119,9 +119,18 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
         leftObjects++;
         rightObjects--;
         assert(rightObjects > 0);
-        if(GetBoxValueMinFromAxis((it+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+        bool allowed = true;
+        for(auto jt = it; jt != maxRight; ++jt)
+        {
+            if(GetBoxValueMinFromAxis((jt+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+            {
+                allowed = false;
+                break;
+            }
+        }
+        if(!allowed)
             continue;
-        float split = (GetBoxValueMaxFromAxis((it+1)->first, axis) + GetBoxValueMaxFromAxis(it->first, axis)) / 2;
+        float split = (GetBoxValueMinFromAxis((it+1)->first, axis) + GetBoxValueMaxFromAxis(it->first, axis)) / 2;
         float sah = emptySpaceCost_ + leftObjects * (split - lMax) + rightObjects * (rMax - split);
         if(sah <= optimalSAH)
         {
@@ -142,9 +151,18 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
         leftObjects++;
         rightObjects--;
         assert(rightObjects > 0);
-        if(GetBoxValueMinFromAxis((it+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+        bool allowed = true;
+        for(auto jt = it; jt != minRight; ++jt)
+        {
+            if(GetBoxValueMinFromAxis((jt+1)->first, axis) < GetBoxValueMaxFromAxis((it)->first, axis))
+            {
+                allowed = false;
+                break;
+            }
+        }
+        if(!allowed)
             continue;
-        float split = (GetBoxValueMinFromAxis((it+1)->first, axis) + GetBoxValueMinFromAxis(it->first, axis)) / 2;
+        float split = (GetBoxValueMinFromAxis((it+1)->first, axis) + GetBoxValueMaxFromAxis(it->first, axis)) / 2;
         float sah = emptySpaceCost_ + leftObjects * (split - lMin) + rightObjects * (rMin - split);
         if(sah <= optimalSAH)
         {
@@ -167,133 +185,23 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
     node->leaf = false;
     node->left = DivideAndBuild(axis, maxLeft, maxLeft+optimalLeftObjects - 1, minLeft, minLeft + optimalLeftObjects - 1);
     node->right = DivideAndBuild(axis, maxLeft+optimalLeftObjects, maxRight, minLeft + optimalLeftObjects, minRight);
+    node->plane = optimalSplit;
     return node;
 }
 
 Color KDTree::RenderPhoton(Photon photon)
 {
     Box box = this->primaryBox_;
-    Box b1, b2;
     auto xNode = rootX_;
     auto yNode = rootY_;
     auto zNode = rootZ_;
-    std::vector<ISceneObject*>* objects;
     std::pair<Point, Point> intersects;
     if(!photon.IntersecWithBox(box, intersects))
         return Color(0, 0, 0);
-    while(true){
-    if(xNode->leaf)
-    {
-        objects = &(xNode->object);
-        break;
-    }
-    if(yNode->leaf)
-    {
-        objects = &(yNode->object);
-        break;
-    }
-    if(zNode->leaf)
-    {
-        objects = &(zNode->object);
-        break;
-    }
-    if(box.XLength() > box.YLength() && box.XLength() > box.ZLength())
-    {
-            b1 = box;
-            b1.XMax = xNode->plane;
-            b2 = box;
-            b2.XMin = xNode->plane;
-            if(!photon.IntersecWithBox(b1, intersects))
-            {
-                box = b2;
-                xNode = xNode->right;
-            }
-            else
-            {
-                if(!photon.IntersecWithBox(b1, intersects))
-                {
-                    box = b1;
-                    xNode = xNode->left;
-                }
-
-            }
-            if(xNode->leaf)
-            {
-                objects = &(xNode->object);
-                break;
-            }
-            continue;
-        }
-        else
-        {
-            if(box.YLength() > box.XLength() && box.YLength() > box.ZLength())
-            {
-                b1 = box;
-                b1.YMax = yNode->plane;
-                b2 = box;
-                b2.YMin = yNode->plane;
-                if(!photon.IntersecWithBox(b1, intersects))
-                {
-                    box = b2;
-                    yNode = yNode->right;
-                }
-                else
-                {
-                    if(!photon.IntersecWithBox(b1, intersects))
-                    {
-                        box = b1;
-                        yNode = yNode->left;
-                    }
-                }
-                if(yNode->leaf)
-                {
-                    objects = &(yNode->object);
-                    break;
-                }
-                continue;
-            }
-            else
-            {
-                b1 = box;
-                b1.ZMax = zNode->plane;
-                b2 = box;
-                b2.ZMin = zNode->plane;
-                if(!photon.IntersecWithBox(b1, intersects))
-                {
-                    box = b2;
-                    zNode = zNode->right;
-                }
-                else
-                {
-                    if(!photon.IntersecWithBox(b1, intersects))
-                    {
-                        box = b1;
-                        zNode = zNode->left;
-                    }
-
-                }
-                if(zNode->leaf)
-                {
-                    objects = &(zNode->object);
-                    break;
-                }
-                continue;
-            }
-        }
-    }
-    CollisionData minCollision(false);
-    for(auto obj = objects->begin(); obj != objects->end(); ++obj)
-    {
-        CollisionData* collision = (*obj)->GetCollision(photon);
-        if(collision->IsCollide)
-        {
-            if(!minCollision.IsCollide || (collision->CollisionPoint - photon.Position()).Length() <
-                    (minCollision.CollisionNormal - photon.Position()).Length())
-                minCollision = *collision;
-        }
-        delete collision;
-    }
-    return minCollision.PixelColor;
+    auto minCollision = this->CollideNode(xNode, yNode, zNode, box, photon);
+    auto color = minCollision->PixelColor;
+    delete minCollision;
+    return color;
 }
 
 float KDTree::GetBoxValueMaxFromAxis(const Box& box, KDTree::Axis axis) const
@@ -330,26 +238,32 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
 {
     std::vector<ISceneObject*>* objects;
     std::pair<Point, Point> intersects;
-    bool leaf = false;
+    bool xleaf = false;
+    bool yleaf = false;
+    bool zleaf = false;
     if(xNode->leaf)
     {
         objects = &(xNode->object);
-        leaf = true;
+        xleaf = true;
     }
     if(yNode->leaf)
     {
-        objects = &(yNode->object);
-        leaf = true;
+        if(!xleaf || (xleaf && yNode->object.size() < xNode->object.size()))
+            objects = &(yNode->object);
+        yleaf = true;
     }
     if(zNode->leaf)
     {
-        objects = &(zNode->object);
-        leaf = true;
+        if((!xleaf && !yleaf)||(xleaf && zNode->object.size() < xNode->object.size()) ||
+                (yleaf && zNode->object.size() < yNode->object.size()))
+            objects = &(zNode->object);
+        zleaf = true;
     }
     Box b1, b2;
-    if(!leaf)
+    if(!xleaf || !yleaf || !zleaf)
     {
-        if(box.XLength() > box.YLength() && box.XLength() > box.ZLength())
+        if(!xleaf &&
+                ((zleaf && yleaf)||(box.XLength() > box.YLength() && box.XLength() > box.ZLength())))
         {
                 b1 = box;
                 b1.XMax = xNode->plane;
@@ -394,7 +308,8 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
             }
             else
             {
-                if(box.YLength() > box.XLength() && box.YLength() > box.ZLength())
+                if(!yleaf &&
+                        ((xleaf && zleaf) || (box.YLength() > box.XLength() && box.YLength() > box.ZLength())))
                 {
                     b1 = box;
                     b1.YMax = yNode->plane;
@@ -488,8 +403,8 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
         CollisionData* collision = (*obj)->GetCollision(photon);
         if(collision->IsCollide)
         {
-            if(!minCollision->IsCollide || (collision->CollisionPoint - photon.Position()).Length() <
-                    (minCollision->CollisionNormal - photon.Position()).Length())
+            if(! minCollision->IsCollide || (collision->CollisionPoint - photon.Position()).Length() <
+                    (minCollision->CollisionPoint- photon.Position()).Length())
                 minCollision = collision;
         }
         else
