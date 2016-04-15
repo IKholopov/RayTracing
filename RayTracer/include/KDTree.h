@@ -26,7 +26,8 @@ class KDTree: public IGeometryHierarchy
         KDNode* DivideAndBuild(Axis axis, std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxLeft,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxRight,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,
-                                std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight);
+                                std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight,
+                               float min, float max);
 
         Color RenderPhoton(Photon photon);
 

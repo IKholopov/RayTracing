@@ -81,6 +81,7 @@ class Box
         float XLength();
         float YLength();
         float ZLength();
+        bool IsInside(Point point);
 };
 
 bool IsFloatZero(float a);

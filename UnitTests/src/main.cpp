@@ -7,6 +7,11 @@
 
 void TestPhotonBoxIntersect()
 {
+    Box tb(0.75, -0.5, 4.75, 3.5, 0.75, -0.5);
+    Photon ph(Point(0, -10, 0), Point(0.046875, 11, 0.08915));
+    std::pair<Point, Point> ps;
+    TEST(ph.IntersecWithBox(tb, ps), "YZ");
+    std::cout << ps.first << " " << ps.second << std::endl;
     Box box(5, 1 , 2, 0, 3, 0);
     std::pair<Point, Point> points;
     Photon photon(Point(0, 0, 0), Point(0, 1, 0));

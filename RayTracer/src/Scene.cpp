@@ -9,6 +9,8 @@ void Scene::RenderScene()
         for(int y = 0; y < camera_.GetHeight(); ++y)
         {
             auto photon = camera_.GetPhotonForPixel(x, y);
+            if(x == 430 && y == 140)
+                int a = 0;
             auto color = hierarchy_->RenderPhoton(photon);
             view_->UpdatePixel(x, y, color);
         }

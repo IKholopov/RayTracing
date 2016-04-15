@@ -112,6 +112,15 @@ float Box::ZLength()
     return ZMax - ZMin;
 }
 
+bool Box::IsInside(Point point)
+{
+    if(point.X <= XMax && point.X >= XMin &&
+            point.Y <= YMax && point.Y >= YMin &&
+            point.Z <= ZMax && point.Z >= ZMin)
+        return true;
+    return false;
+}
+
 bool IsFloatZero(float a)
 {
     if(std::fabs(a) < 1e-6)
