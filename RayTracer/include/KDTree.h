@@ -7,7 +7,7 @@
 class KDTree: public IGeometryHierarchy
 {
     public:
-        KDTree(float emptySpaceCost, float maxNodeCost);
+        KDTree(float emptySpaceCost, float maxNodeCost, unsigned int maxDepth);
         void Initialize(std::vector<ISceneObject*>& objects);
     private:
         enum Axis{ A_X, A_Y, A_Z};
@@ -27,7 +27,7 @@ class KDTree: public IGeometryHierarchy
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxRight,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight,
-                               float min, float max);
+                               float min, float max, unsigned int depth);
 
         Color RenderPhoton(Photon photon);
 
@@ -41,6 +41,7 @@ class KDTree: public IGeometryHierarchy
         Box primaryBox_;
         float emptySpaceCost_;
         float maxNodeCost_;
+        unsigned int maxDepth_;
 
 };
 

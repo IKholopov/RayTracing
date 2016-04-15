@@ -46,9 +46,9 @@ struct sortZMin
     }
 };
 
-KDTree::KDTree(float emptySpaceCost, float maxNodeCost): primaryBox_(0, 0, 0, 0, 0, 0),
+KDTree::KDTree(float emptySpaceCost, float maxNodeCost, unsigned int maxDepth): primaryBox_(0, 0, 0, 0, 0, 0),
                                             emptySpaceCost_(emptySpaceCost), maxNodeCost_(maxNodeCost),
-                                            rootX_(nullptr), rootY_(nullptr), rootZ_(nullptr)
+                                            rootX_(nullptr), rootY_(nullptr), rootZ_(nullptr), maxDepth_(maxDepth)
 {}
 
 void KDTree::Initialize(std::vector<ISceneObject*>& objects)
@@ -80,21 +80,21 @@ void KDTree::Initialize(std::vector<ISceneObject*>& objects)
     }
 
     rootX_ = DivideAndBuild(Axis::A_X, xBoxes_max.begin(), xBoxes_max.end()-1, xBoxes_min.begin(), xBoxes_min.end()-1,
-                            primaryBox_.XMin - 1, primaryBox_.XMax + 1);
+                            primaryBox_.XMin - 1, primaryBox_.XMax + 1, 0);
     rootY_ = DivideAndBuild(Axis::A_Y, yBoxes_max.begin(), yBoxes_max.end()-1, yBoxes_min.begin(), yBoxes_min.end()-1,
-                            primaryBox_.YMin - 1, primaryBox_.YMax + 1);
+                            primaryBox_.YMin - 1, primaryBox_.YMax + 1, 0);
     rootZ_ = DivideAndBuild(Axis::A_Z, zBoxes_max.begin(), zBoxes_max.end()-1, zBoxes_min.begin(), zBoxes_min.end()-1,
-                            primaryBox_.ZMin - 1, primaryBox_.ZMax + 1);
+                            primaryBox_.ZMin - 1, primaryBox_.ZMax + 1, 0);
 }
 
 KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxLeft,
                                       std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxRight,
                                       std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,
-                                      std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight, float min, float max)
+                                      std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight, float min, float max, unsigned int depth)
 {
     float lMax = GetBoxValueMaxFromAxis(maxLeft->first, axis);
     float rMax = GetBoxValueMaxFromAxis(maxRight->first, axis);
-    if(maxNodeCost_ > emptySpaceCost_ + (rMax - lMax)*(std::distance(maxLeft, maxRight) + 1))
+    if(depth > this->maxDepth_  || maxNodeCost_ > emptySpaceCost_ + (rMax - lMax)*(std::distance(maxLeft, maxRight) + 1))
     {
         auto node = new KDNode(axis);
         node->leaf = true;
@@ -262,8 +262,8 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
             std::sort(leftMin.begin(), leftMin.end(), sortZMin());
             std::sort(rightMin.begin(), rightMin.end(), sortZMin());
         }
-        node->left = DivideAndBuild(axis, leftMax.begin(), leftMax.end() - 1, leftMin.begin(), leftMin.end() - 1, min, optimalSplit);
-        node->right = DivideAndBuild(axis, rightMax.begin(), rightMax.end() - 1, rightMin.begin(), rightMin.end() - 1, optimalSplit, max);
+        node->left = DivideAndBuild(axis, leftMax.begin(), leftMax.end() - 1, leftMin.begin(), leftMin.end() - 1, min, optimalSplit, depth + 1);
+        node->right = DivideAndBuild(axis, rightMax.begin(), rightMax.end() - 1, rightMin.begin(), rightMin.end() - 1, optimalSplit, max, depth + 1);
     node->leaf = false;
     node->plane = optimalSplit;
     return node;
@@ -316,7 +316,7 @@ float KDTree::GetBoxValueMinFromAxis(const Box& box, KDTree::Axis axis) const
 CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, KDTree::KDNode* zNode,
                                   Box box, const Photon& photon)
 {
-    std::vector<ISceneObject*>* objects;
+    std::vector<ISceneObject*>* objects = nullptr;
     std::pair<Point, Point> intersects;
     bool xleaf = false;
     bool yleaf = false;
@@ -349,7 +349,7 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
     if(box.ZLength() > length)
         maxAxis = A_Z;
     Box b1, b2;
-    if(!xleaf || !yleaf || !zleaf)
+    if((!xleaf || !yleaf || !zleaf) && (objects && objects->size() < 5));
     {
         if(!xleaf &&
                 ((zleaf && yleaf)|| maxAxis == A_X))

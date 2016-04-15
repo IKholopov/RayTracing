@@ -5,6 +5,7 @@
 #include "GLView.h"
 #include "Kernel.h"
 #include "SimpleSerializer.h"
+#include "STLBinarySerializer.h"
 
 const unsigned int W = 640;
 const unsigned int H = 480;
@@ -26,7 +27,7 @@ void display()
 int main( int argc, char **argv )
 {
     view = new GLView(W, H);
-    SimpleSerializer* serializer = new SimpleSerializer();
+    auto serializer = new STLBinarySerializer();
     if(argc < 2)
     {
         std::cerr << "No scene file to render" << std::endl;

@@ -66,9 +66,17 @@ CollisionData* Polygon::GetCollision(Photon photon)
     if(n1*n2 > 0 && n2*n3 > 0 && n3*n1 > 0)
     {
         if(height * norm < 0)
+        {
+            if(outterMaterial_== nullptr)
+                return new CollisionData(true, Color(1, 1, 1), intersecPoint, norm);
             return new CollisionData(true, outterMaterial_->GetSelfColor(), intersecPoint, norm);
+        }
         else
+        {
+            if(innerMaterial_== nullptr)
+                return new CollisionData(true, Color(1, 1, 1), intersecPoint, norm);
             return new CollisionData(true, innerMaterial_->GetSelfColor(), intersecPoint, norm);
+        }
     }
     return new CollisionData(false);
 }
