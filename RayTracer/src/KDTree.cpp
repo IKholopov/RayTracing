@@ -171,96 +171,71 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
     }
         auto node = new KDNode(axis);
         node->leaf = false;
-        std::vector<std::pair<Box, ISceneObject*>> lobj;
-        std::vector<std::pair<Box, ISceneObject*>> robj;
-        if(foundOptimalInMin)
-            for(auto it = minLeft; it != minRight + 1; ++it)
+        std::vector<std::pair<Box, ISceneObject*>> leftMax;
+        std::vector<std::pair<Box, ISceneObject*>> leftMin;
+        std::vector<std::pair<Box, ISceneObject*>> rightMax;
+        std::vector<std::pair<Box, ISceneObject*>> rightMin;
+        for(auto it = minLeft; it != minRight + 1; ++it)
+        {
+            if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) ||
+                IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit))
+                {
+                    if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) &&
+                            GetBoxValueMinFromAxis(it->first, axis) <= optimalSplit)
+                        leftMin.push_back(*(it));
+                    if(IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit) &&
+                            GetBoxValueMaxFromAxis(it->first, axis) >= optimalSplit)
+                        rightMin.push_back(*(it));
+                }
+                else
+                {
+                    if(GetBoxValueMaxFromAxis(it->first, axis) > optimalSplit)
+                        rightMin.push_back(*(it));
+                    if(GetBoxValueMinFromAxis(it->first, axis) < optimalSplit)
+                        leftMin.push_back(*(it));
+                }
+        }
+        for(auto it = maxLeft; it != maxRight + 1; ++it)
             {
                 if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) ||
                         IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit))
                 {
                     if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) &&
                             GetBoxValueMinFromAxis(it->first, axis) <= optimalSplit)
-                        lobj.push_back(*(it));
+                        leftMax.push_back(*(it));
                     if(IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit) &&
                             GetBoxValueMaxFromAxis(it->first, axis) >= optimalSplit)
-                        robj.push_back(*(it));
-                }
-                else
-                {
-                    if(GetBoxValueMaxFromAxis(it->first, axis) > optimalSplit)
-                        robj.push_back(*(it));
-                    if(GetBoxValueMinFromAxis(it->first, axis) < optimalSplit)
-                        lobj.push_back(*(it));
-                }
-            }
-        else
-            for(auto it = maxLeft; it != maxRight + 1; ++it)
-            {
-                if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) ||
-                        IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit))
-                {
-                    if(IsFloatZero(GetBoxValueMaxFromAxis(it->first, axis) - optimalSplit) &&
-                            GetBoxValueMinFromAxis(it->first, axis) <= optimalSplit)
-                        lobj.push_back(*(it));
-                    if(IsFloatZero(GetBoxValueMinFromAxis(it->first, axis) - optimalSplit) &&
-                            GetBoxValueMaxFromAxis(it->first, axis) >= optimalSplit)
-                        robj.push_back(*(it));
+                        rightMax.push_back(*(it));
                 }
                 else
                 {
                     if(GetBoxValueMinFromAxis(it->first, axis) < optimalSplit)
-                        lobj.push_back(*(it));
+                        leftMax.push_back(*(it));
                     if(GetBoxValueMaxFromAxis(it->first, axis) > optimalSplit)
-                        robj.push_back(*(it));
+                        rightMax.push_back(*(it));
                 }
             }
-        if(lobj.size() == 0)
+        if(leftMin.size() == 0)
         {
             node->leaf = true;
-            for(auto it = robj.begin(); it != robj.end(); ++it)
+            for(auto it = rightMin.begin(); it != rightMin.end(); ++it)
                 node->object.push_back(it->second);
             return node;
         }
-        if(robj.size() == 0)
+        if(rightMin.size() == 0)
         {
             node->leaf = true;
-            for(auto it = lobj.begin(); it != lobj.end(); ++it)
+            for(auto it = leftMin.begin(); it != leftMin.end(); ++it)
                 node->object.push_back(it->second);
             return node;
         }
-        if(lobj.size() == std::distance(minLeft, minRight) + 1 &&
-                robj.size() == std::distance(minLeft, minRight) + 1)
+        if(leftMin.size() == std::distance(minLeft, minRight) + 1 &&
+                rightMin.size() == std::distance(minLeft, minRight) + 1)
         {
             node->leaf = true;
-            for(auto it = lobj.begin(); it != lobj.end(); ++it)
+            for(auto it = leftMin.begin(); it != leftMin.end(); ++it)
                 node->object.push_back(it->second);
             return node;
-        }
-        std::vector<std::pair<Box, ISceneObject*>> leftMax(lobj);
-        std::vector<std::pair<Box, ISceneObject*>> leftMin(lobj);
-        std::vector<std::pair<Box, ISceneObject*>> rightMax(robj);
-        std::vector<std::pair<Box, ISceneObject*>> rightMin(robj);
-        if(axis == Axis::A_X)
-        {
-            std::sort(leftMax.begin(), leftMax.end(), sortXMax());
-            std::sort(rightMax.begin(), rightMax.end(), sortXMax());
-            std::sort(leftMin.begin(), leftMin.end(), sortXMin());
-            std::sort(rightMin.begin(), rightMin.end(), sortXMin());
-        }
-        else if(axis == Axis::A_Y)
-        {
-            std::sort(leftMax.begin(), leftMax.end(), sortYMax());
-            std::sort(rightMax.begin(), rightMax.end(), sortYMax());
-            std::sort(leftMin.begin(), leftMin.end(), sortYMin());
-            std::sort(rightMin.begin(), rightMin.end(), sortYMin());
-        }
-        else if(axis == Axis::A_Z)
-        {
-            std::sort(leftMax.begin(), leftMax.end(), sortZMax());
-            std::sort(rightMax.begin(), rightMax.end(), sortZMax());
-            std::sort(leftMin.begin(), leftMin.end(), sortZMin());
-            std::sort(rightMin.begin(), rightMin.end(), sortZMin());
         }
         node->left = DivideAndBuild(axis, leftMax.begin(), leftMax.end() - 1, leftMin.begin(), leftMin.end() - 1, min, optimalSplit, depth + 1);
         node->right = DivideAndBuild(axis, rightMax.begin(), rightMax.end() - 1, rightMin.begin(), rightMin.end() - 1, optimalSplit, max, depth + 1);

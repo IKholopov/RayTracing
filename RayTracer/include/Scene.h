@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "IView.h"
 #include "IGeometryHierarchy.h"
+#include "ThreadPool.h"
 
 class Scene
 {
