@@ -179,7 +179,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             lights.push_back(new PointLight(p, light));
         }
     }
-    auto tree = new KDTree(1.0, 1.0, 4);
+    auto tree = new KDTree(1.0, 1.0);
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
 }

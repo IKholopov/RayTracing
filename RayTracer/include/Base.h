@@ -5,6 +5,8 @@
 #include <istream>
 #include <cmath>
 
+enum Axis{ A_X, A_Y, A_Z};
+
 struct Resolution
 {
         Resolution(unsigned int width, unsigned int height);
@@ -85,6 +87,7 @@ class Box
         float ZMin;
 
         float XLength();
+        float GetMid(Axis axis);
         float YLength();
         float ZLength();
         bool IsInside(Point point);

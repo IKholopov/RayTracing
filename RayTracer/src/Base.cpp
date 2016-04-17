@@ -102,6 +102,15 @@ float Box::XLength()
     return XMax - XMin;
 }
 
+float Box::GetMid(Axis axis)
+{
+    if(axis == A_X)
+        return (XMax + XMin) / 2;
+    if(axis == A_Y)
+        return (YMax + YMin) / 2;
+    return (ZMax + ZMin) / 2;
+}
+
 float Box::YLength()
 {
     return YMax - YMin;

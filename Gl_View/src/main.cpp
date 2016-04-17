@@ -27,7 +27,7 @@ void display()
 int main( int argc, char **argv )
 {
     view = new GLView(W, H);
-    auto serializer = new STLBinarySerializer();
+    auto serializer = new SimpleSerializer();
     if(argc < 2)
     {
         std::cerr << "No scene file to render" << std::endl;
