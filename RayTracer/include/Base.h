@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <istream>
+#include <cmath>
 
 struct Resolution
 {
@@ -18,6 +19,11 @@ struct Color
         float R;
         float G;
         float B;
+        Color RGBtoHSV();
+        Color HSVtoRGB();
+        Color operator + (Color& a);
+        Color operator + (Color&& a);
+        Color operator * (float a);
 };
 
 struct Point

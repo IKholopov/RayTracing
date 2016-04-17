@@ -12,7 +12,6 @@ class SimpleMaterial:public IMaterial
 
     private:
         Color color_;
-
 };
 
 #endif

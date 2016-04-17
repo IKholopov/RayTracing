@@ -13,6 +13,8 @@ class GLView:public IView
         ~GLView();
 
         void UpdatePixel(unsigned int x, unsigned int y, Color color);
+        Color GetPixelColor(unsigned int x, unsigned int y);
+        Resolution GetResolution();
 
         const float* GetData() const;
         Resolution GetResolution() const;
@@ -20,6 +22,7 @@ class GLView:public IView
         std::mutex matrixLock_;
         Resolution resolution_;
         float* data;
+
 };
 
 #endif

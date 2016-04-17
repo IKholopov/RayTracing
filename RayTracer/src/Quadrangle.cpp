@@ -1,14 +1,13 @@
-#include "Parallelogram.h"
+#include "Quadrangle.h"
 
-Parallelogram::Parallelogram(Point pivot, Point left, Point right,
-                             IMaterial* outterMaterial, IMaterial* innerMaterial): pivot_(pivot),left_(left), right_(right),
+#include <assert.h>
+
+Quadrangle::Quadrangle(Point p1, Point p2, Point p3, Point p4,
+                             IMaterial* outterMaterial, IMaterial* innerMaterial): p1_(p1), p2_(p2), p3_(p3), p4_(p4),
                             outterMaterial_(outterMaterial), innerMaterial_(innerMaterial)
 {
+    assert(IsFloatZero((((p2_-p1_)^(p3_-p1_))^((p3_-p1_)^(p4_-p1_))).Length()));
     float XMax, YMax, ZMax, XMin, YMin, ZMin;
-    Point p1_ = pivot;
-    Point p2_ = left;
-    Point p3_ = left + (right - pivot);
-    Point p4_ = right;
     XMax = p1_.X;
     if(p2_.X > XMax)
         XMax = p2_.X;
@@ -54,15 +53,15 @@ Parallelogram::Parallelogram(Point pivot, Point left, Point right,
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Parallelogram::GetBoundingBox()
+Box Quadrangle::GetBoundingBox()
 {
     return boundingBox_;
 }
 
-bool Parallelogram::GetCollision(Photon photon, CollisionData& collision)
+bool Quadrangle::GetCollision(Photon photon, CollisionData& collision)
 {
     auto norm = GetNormal();
-    auto dist = pivot_ - photon.Position();
+    auto dist = p1_- photon.Position();
     auto height = norm * (dist * norm);
     if(IsFloatZero(height.Length()))
     {
@@ -76,10 +75,10 @@ bool Parallelogram::GetCollision(Photon photon, CollisionData& collision)
         return false;
     }
     auto intersecPoint = photon.Position() + photon.Direction().Normalized() * (height.Length() / cosin);
-    auto v1 = pivot_ - intersecPoint;
-    auto v2 = left_ - intersecPoint;
-    auto v3 = left_ + (right_ - pivot_) - intersecPoint;
-    auto v4 = right_ - intersecPoint;
+    auto v1 = p1_ - intersecPoint;
+    auto v2 = p2_ - intersecPoint;
+    auto v3 = p3_ - intersecPoint;
+    auto v4 = p4_ - intersecPoint;
     auto n1 = v1^v2;
     auto n2 = v2^v3;
     auto n3 = v3^v4;
@@ -105,17 +104,17 @@ bool Parallelogram::GetCollision(Photon photon, CollisionData& collision)
     return false;
 }
 
-void Parallelogram::SetOutterMaterial(IMaterial* material)
+void Quadrangle::SetOutterMaterial(IMaterial* material)
 {
     this->outterMaterial_ = material;
 }
 
-void Parallelogram::SetInnerMaterial(IMaterial* material)
+void Quadrangle::SetInnerMaterial(IMaterial* material)
 {
     this->innerMaterial_ = material;
 }
 
-Point Parallelogram::GetNormal()
+Point Quadrangle::GetNormal()
 {
-    return ((right_ - pivot_) ^ (left_ - pivot_)).Normalized();
+    return ((p2_- p1_) ^ (p3_ - p1_)).Normalized();
 }

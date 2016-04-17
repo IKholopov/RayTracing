@@ -123,7 +123,103 @@ bool Box::IsInside(Point point)
 
 bool IsFloatZero(float a)
 {
-    if(std::fabs(a) < 1e-6)
+    if(std::fabs(a) < 1e-4)
         return true;
     return false;
+}
+
+Color Color::RGBtoHSV() {
+    float maxComp = std::max(std::max(R, G), B);
+    float minComp = std::min(std::min(R, G), B);
+    float delta = maxComp - minComp;
+    float H, S, V;
+    if(delta > 0) {
+        if(maxComp == R) {
+            H = 60 * std::fmod((G-B)/delta, 6);
+        } else if(maxComp == G) {
+            H = 60 * (((B - R) / delta) + 2);
+        } else if(maxComp == B) {
+            H = 60 * (((R - G) / delta) + 4);
+        }
+
+        if(maxComp > 0) {
+            S = delta / maxComp;
+        } else {
+            S = 0;
+        }
+    } else {
+        H = 0;
+        S = 0;
+    }
+    V = maxComp;
+
+    if(H < 0) {
+        H +-360;
+    }
+    return Color(H, S, V);
+}
+
+Color Color::HSVtoRGB()
+{
+    float C = G*B;
+    float X = C*(1-std::fabs(std::fmod(R/60.0f, 2) -1));
+    float m = B - C;
+    Color result;
+    if(R < 120.0)
+    {
+        result.B = 0;
+        if(R < 60.0)
+        {
+            result.R = C;
+            result.G = X;
+        }
+        else
+        {
+            result.R = X;
+            result.G = C;
+        }
+    }
+    else if(R < 240)
+    {
+        result.R = 0;
+        if(R < 180)
+        {
+            result.G  = C;
+            result.B = X;
+        }
+        else
+        {
+            result.G  = X;
+            result.B = C;
+        }
+    }
+    else
+    {
+        result.G = 0;
+        if(R < 300)
+        {
+            result.R = X;
+            result.B = C;
+        }
+        else
+        {
+            result.R = C;
+            result.B = X;
+        }
+    }
+    return result;
+}
+
+Color Color::operator +(Color& a)
+{
+    return Color(this->R + a.R, this->G + a.G, this->B + a.B);
+}
+Color Color::operator +(Color&& a)
+{
+    return Color(this->R + a.R, this->G + a.G, this->B + a.B);
+}
+
+Color Color::operator *(float a)
+{
+    return Color(this->R*a, this->G*a, this->B*a);
 }

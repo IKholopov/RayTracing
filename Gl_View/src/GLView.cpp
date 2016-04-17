@@ -25,6 +25,14 @@ void GLView::UpdatePixel(unsigned int x, unsigned int y, Color color)
     data[3*(resolution_.Width*y + x) + 2] = color.B;
 }
 
+Color GLView::GetPixelColor(unsigned int x, unsigned int y)
+{
+    return Color(data[3*(resolution_.Width*y + x) + 0],
+            data[3*(resolution_.Width*y + x) + 1],
+            data[3*(resolution_.Width*y + x) + 2]);
+}
+
+
 Resolution GLView::GetResolution() const
 {
     return resolution_;

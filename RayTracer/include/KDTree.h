@@ -3,6 +3,7 @@
 
 #include "ISceneObject.h"
 #include "IGeometryHierarchy.h"
+#include "PointLight.h"
 
 class KDTree: public IGeometryHierarchy
 {
@@ -28,8 +29,8 @@ class KDTree: public IGeometryHierarchy
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight,
                                float min, float max, unsigned int depth);
-
-        Color RenderPhoton(Photon photon);
+        Color EmitLights(CollisionData& collision, std::vector<PointLight*>& lights);
+        Color RenderPhoton(Photon photon, std::vector<PointLight*>& lights);
 
         float GetBoxValueMaxFromAxis(const Box& box, Axis axis) const;
         float GetBoxValueMinFromAxis(const Box& box, Axis axis) const;

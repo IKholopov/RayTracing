@@ -44,18 +44,22 @@ Box Polygon::GetBoundingBox()
     return boundingBox_;
 }
 
-CollisionData* Polygon::GetCollision(Photon photon)
+bool Polygon::GetCollision(Photon photon, CollisionData& collision)
 {
     auto norm = GetNormal();
     auto dist = p1_ - photon.Position();
     auto height = norm * (dist * norm);
     if(IsFloatZero(height.Length()))
     {
-        return new CollisionData(false);
+        collision.IsCollide = false;
+        return false;
     }
     auto cosin = height*photon.Direction() / (height.Length()) / photon.Direction().Length();
     if(cosin <= 0)
-        return new CollisionData(false);
+    {
+        collision.IsCollide = false;
+        return false;
+    }
     auto intersecPoint = photon.Position() + photon.Direction().Normalized() * (height.Length() / cosin);
     auto v1 = p1_ - intersecPoint;
     auto v2 = p2_ - intersecPoint;
@@ -65,20 +69,28 @@ CollisionData* Polygon::GetCollision(Photon photon)
     auto n3 = v3^v1;
     if(n1*n2 > 0 && n2*n3 > 0 && n3*n1 > 0)
     {
+        collision.IsCollide = true;
+        collision.Owner = this;
+        collision.CollisionPoint = intersecPoint;
         if(height * norm < 0)
         {
             if(outterMaterial_== nullptr)
-                return new CollisionData(true, Color(1, 1, 1), intersecPoint, norm);
-            return new CollisionData(true, outterMaterial_->GetSelfColor(), intersecPoint, norm);
+                collision.PixelColor = Color(1, 1, 1);
+            else
+                collision.PixelColor = outterMaterial_->GetSelfColor();
+            collision.CollisionNormal = norm;
         }
         else
         {
             if(innerMaterial_== nullptr)
-                return new CollisionData(true, Color(1, 1, 1), intersecPoint, norm);
-            return new CollisionData(true, innerMaterial_->GetSelfColor(), intersecPoint, norm);
+                collision.PixelColor = Color(1, 1, 1);
+            else collision.PixelColor = innerMaterial_->GetSelfColor();
+            collision.CollisionNormal = norm*(-1);
         }
+        return true;
     }
-    return new CollisionData(false);
+    collision.IsCollide = false;
+    return false;
 }
 
 void Polygon::SetOutterMaterial(IMaterial* material)

@@ -7,6 +7,7 @@
 #include "Sphere.h"
 #include "Polygon.h"
 #include "Parallelogram.h"
+#include "Quadrangle.h"
 #include "SimpleMaterial.h"
 
 void errorFile()
@@ -25,6 +26,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
     }
     Camera* camera = nullptr;
     std::vector<ISceneObject*> objects;
+    std::vector<PointLight*> lights;
     std::string s;
     bool sRead = false;
     while(!stream.eof())
@@ -139,10 +141,47 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             }
             objects.push_back(pal);
         }
+        else if(!s.compare("quadrangle"))
+        {
+            Point p1, p2, p3, p4;
+            stream >> p1 >> p2 >> p3 >> p4;
+            Quadrangle* quad = new Quadrangle(p1, p2, p3, p4);
+            stream >> s;
+            if(!s.compare("outMaterial"))
+            {
+                IMaterial* material = LoadMaterial(stream);
+                quad->SetOutterMaterial(material);
+            }
+            else{
+                sRead = true;
+                objects.push_back(quad);
+                continue;
+            }
+            stream >> s;
+            if(!s.compare("inMaterial"))
+            {
+                IMaterial* material = LoadMaterial(stream);
+                quad->SetInnerMaterial(material);
+            }
+            else{
+                sRead = true;
+                objects.push_back(quad);
+                continue;
+            }
+            objects.push_back(quad);
+        }
+        else if(!s.compare("pointLight"))
+        {
+            Point p;
+            Color light;
+            stream >> p;
+            stream >> light.R >> light.G >> light.B;
+            lights.push_back(new PointLight(p, light));
+        }
     }
-    auto tree = new KDTree(1.0, 1.0, 40);
+    auto tree = new KDTree(1.0, 1.0, 4);
     tree->Initialize(objects);
-    return new Scene(*camera, view, tree);
+    return new Scene(*camera, view, tree, lights);
 }
 
 IMaterial* SimpleSerializer::LoadMaterial(std::ifstream& stream)

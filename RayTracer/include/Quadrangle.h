@@ -1,13 +1,13 @@
-#ifndef PARALLELOGRAM_H
-#define PARALLELOGRAM_H
+#ifndef QUADRANGLE_H
+#define QUADRANGLE_H
 
 #include "ISceneObject.h"
 
 
-class Parallelogram : public ISceneObject
+class Quadrangle : public ISceneObject
 {
     public:
-        Parallelogram(Point pivot, Point left, Point right,
+        Quadrangle(Point p1, Point p2, Point p3, Point p4,
                 IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
         Box GetBoundingBox();
         bool GetCollision(Photon photon, CollisionData& collision);
@@ -15,9 +15,10 @@ class Parallelogram : public ISceneObject
         void SetInnerMaterial(IMaterial* material);
     private:
         Point GetNormal();
-        Point pivot_;
-        Point left_;
-        Point right_;
+        Point p1_;
+        Point p2_;
+        Point p3_;
+        Point p4_;
         Box boundingBox_;
         IMaterial* outterMaterial_;
         IMaterial* innerMaterial_;

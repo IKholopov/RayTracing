@@ -5,6 +5,10 @@
 
 #include "Base.h"
 #include "Photon.h"
+#include "ISceneObject.h"
+
+class ISceneObject;
+class Photon;
 
 struct CollisionData
 {
@@ -15,6 +19,7 @@ struct CollisionData
         Color PixelColor;
         Point CollisionPoint;
         Point CollisionNormal;
+        ISceneObject* Owner;
         std::vector<Photon> Photons;
 };
 

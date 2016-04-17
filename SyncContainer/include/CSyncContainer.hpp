@@ -17,6 +17,7 @@ class CSyncContainer
         void push(value_type item);
         bool popOrSleep(value_type& item);
         bool popNoSleep(value_type& item);
+        void WaitForEmpty();
         size_t size();
         void terminate();
         void restart();
@@ -83,6 +84,7 @@ bool CSyncContainer<CONTAINER>::popOrSleep(value_type& item)
     if(container_.empty())
         return false;
     this->popFromContainer(container_, item);
+    notEmptyFlag_.notify_all();
     return true;
 }
 
@@ -93,7 +95,15 @@ bool CSyncContainer<CONTAINER>::popNoSleep(value_type& item)
     if(container_.empty())
         return false;
     this->popFromContainer(container_, item);
+    notEmptyFlag_.notify_all();
     return true;
+}
+template <class CONTAINER>
+void CSyncContainer<CONTAINER>::WaitForEmpty()
+{
+    std::unique_lock<std::mutex> lock(containerLock_);
+    while(!container_.empty())
+        notEmptyFlag_.wait(lock);
 }
 template <class CONTAINER>
 size_t CSyncContainer<CONTAINER>::size()

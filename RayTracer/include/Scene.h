@@ -10,13 +10,13 @@
 class Scene
 {
     public:
-        Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy);
-
+        Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights);
         void RenderScene();
     private:
         IGeometryHierarchy* hierarchy_;
         IView* view_;
         Camera camera_;
+        std::vector<PointLight*> lights_;
 };
 
 #endif

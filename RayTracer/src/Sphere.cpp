@@ -16,34 +16,46 @@ Box Sphere::GetBoundingBox()
                (position_+az).Z, (position_-az).Z);
 }
 
-CollisionData*Sphere::GetCollision(Photon photon)
+bool Sphere::GetCollision(Photon photon, CollisionData& collision)
 {
     auto centDist = position_ - photon.Position();
     auto proj = centDist * photon.Direction().Normalized();
     auto heightLen2 = centDist*centDist - std::pow(proj, 2);
     if(heightLen2 > radius_*radius_)
-        return new CollisionData(false);
+    {
+        collision.IsCollide = false;
+        return false;
+    }
     Point intersecPoint(0, 0, 0);
     Point intersecNormal(0, 0, 0);
     auto heightPoint = photon.Direction().Normalized() *
             (centDist * photon.Direction().Normalized()) + photon.Position();
     auto sinus = std::sqrt(1 - heightLen2 / radius_ / radius_);
+    collision.IsCollide = true;
+    collision.Owner = this;
     if(centDist.Length() > radius_)
     {
         intersecPoint = heightPoint - photon.Direction().Normalized() * sinus * radius_;
         intersecNormal = (intersecPoint - position_).Normalized();
+        collision.CollisionPoint = intersecPoint;
+        collision.CollisionNormal = intersecNormal;
         if(outterMaterial_== nullptr)
-            return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);
-        return new CollisionData(true, outterMaterial_->GetSelfColor(), intersecPoint, intersecNormal);
+            collision.PixelColor = Color(1, 1, 1);
+        else
+            collision.PixelColor = outterMaterial_->GetSelfColor();
     }
     else
     {
-        intersecPoint = heightPoint + photon.Direction().Normalized() * sinus ;
+        intersecPoint = heightPoint + photon.Direction().Normalized() * sinus*radius_;
         intersecNormal = (intersecPoint - position_).Normalized() * -1;
+        collision.CollisionPoint = intersecPoint;
+        collision.CollisionNormal = intersecNormal;
         if(innerMaterial_== nullptr)
-            return new CollisionData(true, Color(1, 1, 1), intersecPoint, intersecNormal);
-        return new CollisionData(true, innerMaterial_->GetSelfColor(), intersecPoint, intersecNormal);
+            collision.PixelColor = Color(1, 1, 1);
+        else
+            collision.PixelColor = outterMaterial_->GetSelfColor();
     }
+    return true;
 }
 
 void Sphere::SetOutterMaterial(IMaterial* material)

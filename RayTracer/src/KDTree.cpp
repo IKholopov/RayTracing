@@ -90,7 +90,8 @@ void KDTree::Initialize(std::vector<ISceneObject*>& objects)
 KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxLeft,
                                       std::vector<std::pair<Box, ISceneObject*>>::const_iterator maxRight,
                                       std::vector<std::pair<Box, ISceneObject*>>::const_iterator minLeft,
-                                      std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight, float min, float max, unsigned int depth)
+                                      std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight,
+                                      float min, float max, unsigned int depth)
 {
     float lMax = GetBoxValueMaxFromAxis(maxLeft->first, axis);
     float rMax = GetBoxValueMaxFromAxis(maxRight->first, axis);
@@ -244,7 +245,25 @@ KDTree::KDNode*KDTree::DivideAndBuild(KDTree::Axis axis, std::vector<std::pair<B
     return node;
 }
 
-Color KDTree::RenderPhoton(Photon photon)
+Color KDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lights)
+{
+    Color c = collision.PixelColor.RGBtoHSV();
+    c.B = 0;
+    for(auto light: lights)
+    {
+        Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
+        if(this->CollideNode(this->rootX_, this->rootY_, this->rootZ_, this->primaryBox_, photon)->IsCollide)
+            continue;
+        Color lColor = light->GetLight();
+        lColor.B *= (200.0f / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
+                (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
+        c = c + lColor;
+    }
+    auto fin = c.HSVtoRGB();
+    return fin;
+}
+
+Color KDTree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
 {
     Box box = this->primaryBox_;
     auto xNode = rootX_;
@@ -254,7 +273,11 @@ Color KDTree::RenderPhoton(Photon photon)
     if(!photon.IntersecWithBox(box, intersects))
         return Color(0, 0, 0);
     auto minCollision = this->CollideNode(xNode, yNode, zNode, box, photon);
-    auto color = minCollision->PixelColor;
+    Color color;
+    if(minCollision->IsCollide)
+        color = this->EmitLights(*minCollision, lights);
+    else
+        color = minCollision->PixelColor;
     delete minCollision;
     return color;
 }
@@ -333,6 +356,13 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
                 b1.XMax = xNode->plane;
                 b2 = box;
                 b2.XMin = xNode->plane;
+#ifdef DEBUG
+                photon.IntersecWithBox(b1, intersects);
+                if((IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Y - yNode->plane))
+                        || (IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane))
+                        || (IsFloatZero(intersects.first.Y - yNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane)) )
+                    return new CollisionData(true, Color(0, 1, 0), intersects.first, Point(1, 0, 0));
+#endif
                 if(!photon.IntersecWithBox(b1, intersects))
                 {
                     box = b2;
@@ -379,6 +409,13 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
                     b1.YMax = yNode->plane;
                     b2 = box;
                     b2.YMin = yNode->plane;
+#ifdef DEBUG
+                    photon.IntersecWithBox(b1, intersects);
+                    if((IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Y - yNode->plane))
+                            || (IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane))
+                            || (IsFloatZero(intersects.first.Y - yNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane)) )
+                        return new CollisionData(true, Color(0, 1, 0), intersects.first, Point(1, 0, 0));
+#endif
                     if(!photon.IntersecWithBox(b1, intersects))
                     {
                         box = b2;
@@ -422,6 +459,13 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
                     b1.ZMax = zNode->plane;
                     b2 = box;
                     b2.ZMin = zNode->plane;
+#ifdef DEBUG
+                    photon.IntersecWithBox(b1, intersects);
+                    if((IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Y - yNode->plane))
+                            || (IsFloatZero(intersects.first.X - xNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane))
+                            || (IsFloatZero(intersects.first.Y - yNode->plane) && IsFloatZero(intersects.first.Z - zNode->plane)) )
+                        return new CollisionData(true, Color(0, 1, 0), intersects.first, Point(1, 0, 0));
+#endif
                     if(!photon.IntersecWithBox(b1, intersects))
                     {
                         box = b2;
@@ -462,28 +506,19 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* xNode, KDTree::KDNode* yNode, 
             }
         }
     CollisionData* minCollision = new CollisionData(false);
-    if(objects->size() > 10)
-        int a = 0;
+    CollisionData collision(false);
     for(auto obj = objects->begin(); obj != objects->end(); ++obj)
     {
-        CollisionData* collision = (*obj)->GetCollision(photon);
-        if(collision->IsCollide)
+        (*obj)->GetCollision(photon, collision);
+        if(collision.IsCollide && photon.Owner() != collision.Owner)
         {
-            auto newDist = (collision->CollisionPoint - photon.Position()).Length();
+            auto newDist = (collision.CollisionPoint - photon.Position()).Length();
             auto oldDist = (minCollision->CollisionPoint- photon.Position()).Length();
             if(! minCollision->IsCollide || newDist < oldDist)
             {
 
-                delete minCollision;
-                minCollision = collision;
+                *minCollision = collision;
             }
-            else {
-                delete collision;
-            }
-        }
-        else
-        {
-            delete collision;
         }
     }
     return minCollision;

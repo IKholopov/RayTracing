@@ -1,6 +1,7 @@
 #include "Photon.h"
 
-Photon::Photon(Point position, Point direction):position_(position), direction_(direction) {}
+Photon::Photon(Point position, Point direction, ISceneObject* owner):position_(position), direction_(direction), owner_(owner)
+{}
 
 Point Photon::Position() const
 {
@@ -10,6 +11,11 @@ Point Photon::Position() const
 Point Photon::Direction() const
 {
     return direction_;
+}
+
+ISceneObject*Photon::Owner() const
+{
+    return owner_;
 }
 
 

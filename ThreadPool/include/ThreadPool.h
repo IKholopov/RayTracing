@@ -14,6 +14,7 @@ class ThreadPool
         ~ThreadPool();
         void AddTask(std::function<void()> task);
         void Terminate();
+        void WaitAll();
 
     private:
         std::atomic<bool> terminated_;

@@ -6,6 +6,8 @@
 #include "Base.h"
 #include "Photon.h"
 
+class Photon;
+
 class IMaterial
 {
     public:

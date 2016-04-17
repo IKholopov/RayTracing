@@ -9,7 +9,7 @@ class Sphere: public ISceneObject
     public:
         Sphere(float radius, Point position, IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
         Box GetBoundingBox();
-        CollisionData* GetCollision(Photon photon);
+        bool GetCollision(Photon photon, CollisionData& collision);
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);
     private:

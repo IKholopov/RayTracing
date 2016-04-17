@@ -50,3 +50,8 @@ void ThreadPool::Terminate()
         threads_[i]->join();
     assert(container_.size() == 0);
 }
+
+void ThreadPool::WaitAll()
+{
+    container_.WaitForEmpty();
+}
