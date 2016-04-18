@@ -16,6 +16,15 @@ Point::Point():X(0), Y(0), Z(0)
 Point::Point(float x, float y, float z):X(x), Y(y), Z(z)
 {}
 
+float Point::GetAxis(Axis axis)
+{
+    if(axis == A_X)
+        return X;
+    if(axis == A_Y)
+        return Y;
+    return Z;
+}
+
 float Point::Length()
 {
     return std::sqrt(X*X+Y*Y+Z*Z);
@@ -111,6 +120,42 @@ float Box::GetMid(Axis axis)
     return (ZMax + ZMin) / 2;
 }
 
+float Box::GetMax(Axis axis)
+{
+    if(axis == A_X)
+        return XMax;
+    if(axis == A_Y)
+        return YMax;
+    return ZMax;
+}
+
+float Box::GetMin(Axis axis)
+{
+    if(axis == A_X)
+        return XMin;
+    if(axis == A_Y)
+        return YMin;
+    return ZMin;
+}
+
+void Box::SetAxisMin(Axis axis, float val)
+{
+    if(axis == A_X)
+        this->XMin = val;
+    else if(axis == A_Y)
+        this->YMin = val;
+    else
+        this->ZMin = val;
+}
+void Box::SetAxisMax(Axis axis, float val)
+{
+    if(axis == A_X)
+        this->XMax = val;
+    else if(axis == A_Y)
+        this->YMax = val;
+    else
+        this->ZMax = val;
+}
 float Box::YLength()
 {
     return YMax - YMin;

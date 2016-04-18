@@ -56,11 +56,22 @@ void KDTree::Initialize(std::vector<ISceneObject*>& objects)
     std::vector<std::pair<Box, ISceneObject*>> boxes;
     for(auto obj: objects)
         boxes.push_back(std::pair<Box, ISceneObject*> (obj->GetBoundingBox(), obj) );
+    std::sort(boxes.begin(), boxes.end(), sortXMax());
+    std::vector<std::pair<Box, ISceneObject*>> xBoxes_min(boxes);
+    std::sort(xBoxes_min.begin(), xBoxes_min.end(), sortXMin());
+    std::vector<std::pair<Box, ISceneObject*>> yBoxes_max(boxes);
+    std::sort(yBoxes_max.begin(), yBoxes_max.end(), sortYMax());
+    std::vector<std::pair<Box, ISceneObject*>> yBoxes_min(boxes);
+    std::sort(yBoxes_min.begin(), yBoxes_min.end(), sortYMin());
+    std::vector<std::pair<Box, ISceneObject*>> zBoxes_max(boxes);
+    std::sort(zBoxes_max.begin(), zBoxes_max.end(), sortZMax());
+    std::vector<std::pair<Box, ISceneObject*>> zBoxes_min(boxes);
+    std::sort(zBoxes_min.begin(), zBoxes_min.end(), sortZMin());
 
 
     if(boxes.size() > 0)
     {
-        primaryBox_.XMax = xBoxes_max.back().first.XMax;
+        primaryBox_.XMax = boxes.back().first.XMax;
         primaryBox_.XMin = xBoxes_min[0].first.XMin;
         primaryBox_.YMax = yBoxes_max.back().first.YMax;
         primaryBox_.YMin = yBoxes_min[0].first.YMin;
@@ -75,12 +86,12 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>
 {
     Axis maxAxis = A_X;
     auto maxLength = box.XLength();
-    if(box.YLength() > maxLenght)
+    if(box.YLength() > maxLength)
     {
         maxAxis = A_Y;
         maxLength = box.YLength();
     }
-    if(box.ZLength() > maxLenght)
+    if(box.ZLength() > maxLength)
     {
         maxAxis = A_Z;
         maxLength = box.ZLength();
@@ -95,18 +106,25 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>
     unsigned int commonObjects = 0;
     for(auto obj: objects)
     {
-        auto maxVal = GetBoxValueMaxFromAxis(obj.first, axis);
-        auto minVal = GetBoxValueMinFromAxis(obj.first, axis);
+        auto maxVal = GetBoxValueMaxFromAxis(obj.first, maxAxis);
+        auto minVal = GetBoxValueMinFromAxis(obj.first, maxAxis);
         if(maxVal > split)
+        {
             rightObjects.push_back(obj);
-        if(minVal < split)
+            if(minVal < split)
+            {
+                leftObjects.push_back(obj);
+                ++commonObjects;
+            }
+        }
+        else
             leftObjects.push_back(obj);
-        if(maxVal > split && minVal < split)
-            ++commonObjects;
+
     }
     KDNode* node = new KDNode();
     node->box = box;
-    if(commonObjects > 0.5 * objects.size())
+    if(commonObjects > 0.5 * objects.size() || leftObjects.size() == objects.size() ||
+            rightObjects.size() == objects.size())
     {
         node->leaf = true;
         for(auto obj: objects)
@@ -134,6 +152,7 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>
     node->left = DivideAndBuild(leftObjects, left);
     node->right = DivideAndBuild(rightObjects, right);
     node->plane = split;
+    node->axis = maxAxis;
     return node;
 }
 
@@ -145,7 +164,7 @@ Color KDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lig
     for(auto light: lights)
     {
         Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
-        if(this->CollideNode(this->rootX_, this->rootY_, this->rootZ_, this->primaryBox_, photon)->IsCollide)
+        if(this->CollideNode(root_, photon)->IsCollide)
             continue;
         Color lColor = light->GetLight();
         lColor.B *= (200.0f / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
@@ -159,13 +178,10 @@ Color KDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lig
 Color KDTree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
 {
     Box box = this->primaryBox_;
-    auto xNode = rootX_;
-    auto yNode = rootY_;
-    auto zNode = rootZ_;
     std::pair<Point, Point> intersects;
     if(!photon.IntersecWithBox(box, intersects))
         return Color(0, 0, 0);
-    auto minCollision = this->CollideNode(xNode, yNode, zNode, box, photon);
+    auto minCollision = this->CollideNode(root_, photon);
     Color color;
     if(minCollision->IsCollide)
         color = this->EmitLights(*minCollision, lights);
@@ -175,7 +191,7 @@ Color KDTree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
     return color;
 }
 
-float KDTree::GetBoxValueMaxFromAxis(const Box& box, KDTree::Axis axis) const
+float KDTree::GetBoxValueMaxFromAxis(const Box& box, Axis axis) const
 {
     switch(axis)
     {
@@ -189,7 +205,7 @@ float KDTree::GetBoxValueMaxFromAxis(const Box& box, KDTree::Axis axis) const
             break;
     }
 }
-float KDTree::GetBoxValueMinFromAxis(const Box& box, KDTree::Axis axis) const
+float KDTree::GetBoxValueMinFromAxis(const Box& box, Axis axis) const
 {
     switch(axis)
     {
@@ -213,12 +229,13 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
     }
     if(!node->leaf)
     {
+
         auto collLeft = this->CollideNode(node->left, photon);
-        auto collRight = this->CollideNode(node->left, photon);
+        auto collRight = this->CollideNode(node->right, photon);
         if(collLeft->IsCollide && collRight->IsCollide)
         {
-            if((collLeft->CollisionPoint - photon.position_).Length() <
-                (collRight->CollisionPoint - photon.position_).Length())
+            if((collLeft->CollisionPoint - photon.Position()).Length() <
+                (collRight->CollisionPoint - photon.Position()).Length())
             {
                 delete collRight;
                 return collLeft;
@@ -227,14 +244,18 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
             return collRight;
         }
         if(collLeft->IsCollide)
+        {
+            delete collRight;
             return collLeft;
+        }
+        delete collLeft;
         return collRight;
     }
     auto minCollision = new CollisionData(false);
-    CollisionData collision;
+    CollisionData collision(false);
     for(auto obj: node->objects)
     {
-        if(obj->GetCollision(collision) && obj != photon.Owner())
+        if(obj->GetCollision(photon, collision) && obj != photon.Owner())
         {
             if(!minCollision->IsCollide || (collision.CollisionPoint - photon.Position()).Length() <
                     (minCollision->CollisionPoint - photon.Position()).Length())

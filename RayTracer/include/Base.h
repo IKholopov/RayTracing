@@ -35,6 +35,7 @@ struct Point
         float X;
         float Y;
         float Z;
+        float GetAxis(Axis axis);
 
         float Length();
         Point Normalized();
@@ -87,9 +88,13 @@ class Box
         float ZMin;
 
         float XLength();
-        float GetMid(Axis axis);
         float YLength();
         float ZLength();
+        float GetMid(Axis axis);
+        float GetMax(Axis axis);
+        float GetMin(Axis axis);
+        void SetAxisMin(Axis axis, float val);
+        void SetAxisMax(Axis axis, float val);
         bool IsInside(Point point);
 };
 

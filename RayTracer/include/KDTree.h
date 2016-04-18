@@ -18,6 +18,7 @@ class KDTree: public IGeometryHierarchy
             KDNode* left;
             KDNode* right;
             Box box;
+            Axis axis;
             std::vector<ISceneObject*> objects;
         };
 
