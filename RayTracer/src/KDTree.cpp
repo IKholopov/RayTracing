@@ -109,17 +109,11 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>
         auto maxVal = GetBoxValueMaxFromAxis(obj.first, maxAxis);
         auto minVal = GetBoxValueMinFromAxis(obj.first, maxAxis);
         if(maxVal > split)
-        {
             rightObjects.push_back(obj);
-            if(minVal < split)
-            {
-                leftObjects.push_back(obj);
-                ++commonObjects;
-            }
-        }
-        else
+        if(minVal < split)
             leftObjects.push_back(obj);
-
+        if(maxVal > split && minVal < split)
+            ++commonObjects;
     }
     KDNode* node = new KDNode();
     node->box = box;
@@ -229,9 +223,27 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
     }
     if(!node->leaf)
     {
-
-        auto collLeft = this->CollideNode(node->left, photon);
-        auto collRight = this->CollideNode(node->right, photon);
+        Box b1 = node->box;
+        Box b2 = node->box;
+        b1.SetAxisMax(node->axis, node->plane );
+        b2.SetAxisMin(node->axis, node->plane );
+        if(b1.IsInside(photon.Position()) || intersets.first.GetAxis(node->axis) <= node->plane)
+        {
+            auto collLeft = this->CollideNode(node->left, photon);
+            if(collLeft->IsCollide && collLeft->CollisionPoint.GetAxis(node->axis) <= node->plane)
+                return collLeft;
+            delete collLeft;
+            return this->CollideNode(node->right, photon);
+        }
+        else
+        {
+            auto collRight = this->CollideNode(node->right, photon);
+            if(collRight->IsCollide && collRight->CollisionPoint.GetAxis(node->axis) >= node->plane)
+                return collRight;
+            delete collRight;
+            return this->CollideNode(node->left, photon);
+        }
+        /*auto collRight = this->CollideNode(node->right, photon);
         if(collLeft->IsCollide && collRight->IsCollide)
         {
             if((collLeft->CollisionPoint - photon.Position()).Length() <
@@ -249,7 +261,7 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
             return collLeft;
         }
         delete collLeft;
-        return collRight;
+        return collRight;*/
     }
     auto minCollision = new CollisionData(false);
     CollisionData collision(false);

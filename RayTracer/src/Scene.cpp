@@ -8,13 +8,15 @@ void RenderPixel(Camera& camera, IGeometryHierarchy* hierarchy, IView* view, std
                  unsigned int x, unsigned int y)
 {
     auto photon = camera.GetPhotonForPixel(x, y);
+    if(x == 170 && y == 105)
+        int a = 0;
     auto color = hierarchy->RenderPhoton(photon, lights);
     view->UpdatePixel(x, y, color);
 }
 
 void Scene::RenderScene()
 {
-    ThreadPool pool(std::thread::hardware_concurrency());
+    ThreadPool pool(1);//std::thread::hardware_concurrency());
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {
@@ -101,4 +103,7 @@ void Scene::RenderScene()
             });
         }
     pool.Terminate();
+    int x = 170;
+    int y = 105;
+    this->view_->UpdatePixel(x,y, Color(1, 0, 0));
 }

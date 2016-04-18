@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.6.1, 2016-04-18T15:47:53. -->
+<!-- Written by QtCreator 3.6.1, 2016-04-18T16:08:45. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -442,7 +442,7 @@
      <value type="int">14</value>
     </valuelist>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguation.Title">GL_View</value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">/home/igor/Downloads/gnome.stl</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments">/home/igor/Downloads/crab.stl</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory">/home/igor/Study/Programming/RayTracing/build-RayTracing-Desktop-Default/Gl_View</value>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
