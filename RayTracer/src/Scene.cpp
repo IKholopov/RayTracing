@@ -7,16 +7,19 @@ Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vec
 void RenderPixel(Camera& camera, IGeometryHierarchy* hierarchy, IView* view, std::vector<PointLight*>& lights,
                  unsigned int x, unsigned int y)
 {
+    //x = 170;
+    //y = 105;
+    //x = 450;
+    //y = 105;
     auto photon = camera.GetPhotonForPixel(x, y);
-    if(x == 170 && y == 105)
-        int a = 0;
     auto color = hierarchy->RenderPhoton(photon, lights);
     view->UpdatePixel(x, y, color);
+    //view->UpdatePixel(450, 105, Color(1, 0, 0));
 }
 
 void Scene::RenderScene()
 {
-    ThreadPool pool(1);//std::thread::hardware_concurrency());
+    ThreadPool pool(std::thread::hardware_concurrency());
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {

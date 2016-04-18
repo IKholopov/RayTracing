@@ -223,14 +223,17 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
     }
     if(!node->leaf)
     {
-        Box b1 = node->box;
-        Box b2 = node->box;
-        b1.SetAxisMax(node->axis, node->plane );
-        b2.SetAxisMin(node->axis, node->plane );
-        if(b1.IsInside(photon.Position()) || intersets.first.GetAxis(node->axis) <= node->plane)
+        Box b1 = node->left->box;
+        Box b2 = node->right->box;
+        std::pair<Point, Point> b1Intersects;
+        std::pair<Point, Point> b2Intersects;
+
+        if(b1.IsInside(photon.Position()) || !photon.IntersecWithBox(b2, b2Intersects) ||
+                (photon.IntersecWithBox(b1, b1Intersects) &&
+                 (b1Intersects.first - photon.Position()).Length()  <= (b2Intersects.first - photon.Position()).Length()))
         {
             auto collLeft = this->CollideNode(node->left, photon);
-            if(collLeft->IsCollide && collLeft->CollisionPoint.GetAxis(node->axis) <= node->plane)
+            if(collLeft->IsCollide && collLeft->CollisionPoint.GetAxis(node->axis) < node->plane)
                 return collLeft;
             delete collLeft;
             return this->CollideNode(node->right, photon);
@@ -238,30 +241,11 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
         else
         {
             auto collRight = this->CollideNode(node->right, photon);
-            if(collRight->IsCollide && collRight->CollisionPoint.GetAxis(node->axis) >= node->plane)
+            if(collRight->IsCollide && collRight->CollisionPoint.GetAxis(node->axis) > node->plane)
                 return collRight;
             delete collRight;
             return this->CollideNode(node->left, photon);
         }
-        /*auto collRight = this->CollideNode(node->right, photon);
-        if(collLeft->IsCollide && collRight->IsCollide)
-        {
-            if((collLeft->CollisionPoint - photon.Position()).Length() <
-                (collRight->CollisionPoint - photon.Position()).Length())
-            {
-                delete collRight;
-                return collLeft;
-            }
-            delete collLeft;
-            return collRight;
-        }
-        if(collLeft->IsCollide)
-        {
-            delete collRight;
-            return collLeft;
-        }
-        delete collLeft;
-        return collRight;*/
     }
     auto minCollision = new CollisionData(false);
     CollisionData collision(false);
