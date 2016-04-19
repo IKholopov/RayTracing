@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <limits>
 
 struct sortXMax
 {
@@ -53,25 +54,25 @@ KDTree::KDTree(float emptySpaceCost, float maxNodeCost): primaryBox_(0, 0, 0, 0,
 
 void KDTree::Initialize(std::vector<ISceneObject*>& objects)
 {
-    std::vector<std::pair<Box, ISceneObject*>> boxes;
+    std::vector<std::pair<Box, ISceneObject*>> xBoxes_max;
     for(auto obj: objects)
-        boxes.push_back(std::pair<Box, ISceneObject*> (obj->GetBoundingBox(), obj) );
-    std::sort(boxes.begin(), boxes.end(), sortXMax());
-    std::vector<std::pair<Box, ISceneObject*>> xBoxes_min(boxes);
+        xBoxes_max.push_back(std::pair<Box, ISceneObject*> (obj->GetBoundingBox(), obj) );
+    std::sort(xBoxes_max.begin(), xBoxes_max.end(), sortXMax());
+    std::vector<std::pair<Box, ISceneObject*>> xBoxes_min(xBoxes_max);
     std::sort(xBoxes_min.begin(), xBoxes_min.end(), sortXMin());
-    std::vector<std::pair<Box, ISceneObject*>> yBoxes_max(boxes);
+    std::vector<std::pair<Box, ISceneObject*>> yBoxes_max(xBoxes_max);
     std::sort(yBoxes_max.begin(), yBoxes_max.end(), sortYMax());
-    std::vector<std::pair<Box, ISceneObject*>> yBoxes_min(boxes);
+    std::vector<std::pair<Box, ISceneObject*>> yBoxes_min(xBoxes_max);
     std::sort(yBoxes_min.begin(), yBoxes_min.end(), sortYMin());
-    std::vector<std::pair<Box, ISceneObject*>> zBoxes_max(boxes);
+    std::vector<std::pair<Box, ISceneObject*>> zBoxes_max(xBoxes_max);
     std::sort(zBoxes_max.begin(), zBoxes_max.end(), sortZMax());
-    std::vector<std::pair<Box, ISceneObject*>> zBoxes_min(boxes);
+    std::vector<std::pair<Box, ISceneObject*>> zBoxes_min(xBoxes_max);
     std::sort(zBoxes_min.begin(), zBoxes_min.end(), sortZMin());
 
 
-    if(boxes.size() > 0)
+    if(xBoxes_max.size() > 0)
     {
-        primaryBox_.XMax = boxes.back().first.XMax;
+        primaryBox_.XMax = xBoxes_max.back().first.XMax;
         primaryBox_.XMin = xBoxes_min[0].first.XMin;
         primaryBox_.YMax = yBoxes_max.back().first.YMax;
         primaryBox_.YMin = yBoxes_min[0].first.YMin;
@@ -79,10 +80,10 @@ void KDTree::Initialize(std::vector<ISceneObject*>& objects)
         primaryBox_.ZMin = zBoxes_min[0].first.ZMin;
     }
 
-    root_ = this->DivideAndBuild(boxes, primaryBox_);
+    root_ = this->DivideAndBuild(xBoxes_max, primaryBox_);
 }
 
-KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>& objects, Box box)
+KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*> >& objects, Box box)
 {
     Axis maxAxis = A_X;
     auto maxLength = box.XLength();
@@ -96,8 +97,8 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*>>
         maxAxis = A_Z;
         maxLength = box.ZLength();
     }
-    auto split = box.GetMid(maxAxis);
-    for(auto obj: objects)
+    auto split = 0;
+    for(auto obj : objects)
     {
         split += obj.first.GetMid(maxAxis);
     }
