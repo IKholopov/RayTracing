@@ -42,7 +42,7 @@ Scene* STLBinarySerializer::LoadScene(std::__cxx11::string filepath, IView* view
                 objects.push_back(obj);
     }
     fclose(f);
-    auto tree = new KDTree(10.0, 1.0);
+    auto tree = new SHAKDTree(10.0, 1.0, 2);
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
 }

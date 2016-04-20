@@ -108,7 +108,7 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*> 
         maxAxis = A_Z;
         maxLength = box.ZLength();
     }
-    auto split = 0;
+    auto split = box.GetMid(maxAxis);
     for(auto obj : objects)
     {
         split += obj.first.GetMid(maxAxis);
