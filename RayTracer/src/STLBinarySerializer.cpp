@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include "KDTree.h"
+#include "SHATree.h"
+#include "SHAKDTree.h"
 #include "Sphere.h"
 #include "Polygon.h"
 #include "Parallelogram.h"

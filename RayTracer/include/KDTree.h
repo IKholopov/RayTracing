@@ -10,6 +10,8 @@ class KDTree: public IGeometryHierarchy
     public:
         KDTree(float emptySpaceCost, float maxNodeCost);
         void Initialize(std::vector<ISceneObject*>& objects);
+        CollisionData* CollidePhoton(const Photon& photon);
+        unsigned int Size();
     private:
         struct KDNode{
             KDNode() {}
@@ -33,6 +35,7 @@ class KDTree: public IGeometryHierarchy
         Box primaryBox_;
         float emptySpaceCost_;
         float maxNodeCost_;
+        unsigned int size_;
 
 };
 

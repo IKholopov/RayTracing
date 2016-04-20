@@ -49,11 +49,12 @@ struct sortZMin
 
 KDTree::KDTree(float emptySpaceCost, float maxNodeCost): primaryBox_(0, 0, 0, 0, 0, 0),
                                             emptySpaceCost_(emptySpaceCost), maxNodeCost_(maxNodeCost),
-                                            root_(nullptr)
+                                            root_(nullptr), size_(0)
 {}
 
 void KDTree::Initialize(std::vector<ISceneObject*>& objects)
 {
+    this->size_ = objects.size();
     std::vector<std::pair<Box, ISceneObject*>> xBoxes_max;
     for(auto obj: objects)
         xBoxes_max.push_back(std::pair<Box, ISceneObject*> (obj->GetBoundingBox(), obj) );
@@ -81,6 +82,16 @@ void KDTree::Initialize(std::vector<ISceneObject*>& objects)
     }
 
     root_ = this->DivideAndBuild(xBoxes_max, primaryBox_);
+}
+
+CollisionData*KDTree::CollidePhoton(const Photon& photon)
+{
+    return CollideNode(this->root_, photon);
+}
+
+unsigned int KDTree::Size()
+{
+    return size_;
 }
 
 KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*> >& objects, Box box)
