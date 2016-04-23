@@ -22,7 +22,8 @@ ISceneObject*Photon::Owner() const
 bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) const
 {
     //XY
-
+    Point foundFirst(0, 0, 0);
+    Point foundSecond(0, 0, 0);
     if(!IsFloatZero(direction_.X) || !IsFloatZero(direction_.Y))
     {
         if(IsFloatZero(direction_.X))
@@ -62,11 +63,15 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                 {
                     points.second.Y = box.YMax;
                     points.second.X = (box.YMax - b)/k;
+                    foundSecond.X = 1;
+                    foundSecond.Y = 1;
                 }
                 else
                 {
                     points.second.Y = box.YMin;
                     points.second.X = (box.YMin - b)/k;
+                    foundSecond.X = 1;
+                    foundSecond.Y = 1;
                 }
             }
             if(!lower && upper)
@@ -75,11 +80,15 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                 {
                     points.first.Y = box.YMin;
                     points.first.X = (box.YMin - b)/k;
+                    foundFirst.X = 1;
+                    foundFirst.Y = 1;
                 }
                 else
                 {
                     points.first.Y = box.YMax;
                     points.first.X = (box.YMax - b)/k;
+                    foundFirst.X = 1;
+                    foundFirst.Y = 1;
                 }
             }
             if(!lower && !upper)
@@ -90,6 +99,10 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                     points.first.X = (box.YMin - b)/k;
                     points.second.Y = box.YMax;
                     points.second.X = (box.YMax - b)/k;
+                    foundFirst.X = 1;
+                    foundFirst.Y = 1;
+                    foundSecond.X = 1;
+                    foundSecond.Y = 1;
                 }
                 else
                 {
@@ -97,6 +110,10 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                     points.first.X = (box.YMax - b)/k;
                     points.second.Y = box.YMin;
                     points.second.X = (box.YMin - b)/k;
+                    foundFirst.X = 1;
+                    foundFirst.Y = 1;
+                    foundSecond.X = 1;
+                    foundSecond.Y = 1;
                 }
             }
         }
@@ -132,13 +149,15 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
         if(z_1 > box.ZMin && z_1 < box.ZMax)
         {
             lower = true;
-            points.first.X = box.XMin;
+            if(!foundFirst.X)
+                points.first.X = box.XMin;
             points.first.Z = z_1;
         }
         if(z_2 > box.ZMin && z_2 < box.ZMax)
         {
             upper = true;
-            points.second.X = box.XMax;
+            if(!foundSecond.X)
+                points.second.X = box.XMax;
             points.second.Z = z_2;
         }
         if(lower && !upper)
@@ -147,11 +166,13 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
             {
                 points.second.Z = box.ZMax;
                 points.second.X = (box.ZMax - b)/k;
+                foundSecond.X = 1;
             }
             else
             {
                 points.second.Z = box.ZMin;
                 points.second.X = (box.ZMin - b)/k;
+                foundSecond.X = 1;
             }
         }
         if(!lower && upper)
@@ -160,11 +181,15 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
             {
                 points.first.Z = box.ZMin;
                 points.first.X = (box.ZMin - b)/k;
+                foundFirst.X = 1;
+                foundFirst.Z = 1;
             }
             else
             {
                 points.first.Z = box.ZMax;
                 points.first.X = (box.ZMax - b)/k;
+                foundFirst.X = 1;
+                foundFirst.Z = 1;
             }
         }
         if(!lower && !upper)
@@ -175,6 +200,10 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                 points.first.X = (box.ZMin - b)/k;
                 points.second.Z = box.ZMax;
                 points.second.X = (box.ZMax - b)/k;
+                foundFirst.X = 1;
+                foundFirst.Z = 1;
+                foundSecond.X = 1;
+                foundSecond.Z = 1;
             }
             else
             {
@@ -182,6 +211,10 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
                 points.first.X = (box.ZMax - b)/k;
                 points.second.Z = box.ZMin;
                 points.second.X = (box.ZMin - b)/k;
+                foundFirst.X = 1;
+                foundFirst.Z = 1;
+                foundSecond.X = 1;
+                foundSecond.Z = 1;
             }
         }
     }
@@ -206,13 +239,15 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
         if(z_1 > box.ZMin && z_1 < box.ZMax)
         {
             lower = true;
-            points.first.Y = box.YMin;
+            if(!foundFirst.Y)
+                points.first.Y = box.YMin;
             points.first.Z = z_1;
         }
         if(z_2 > box.ZMin && z_2 < box.ZMax)
         {
             upper = true;
-            points.second.Y = box.YMax;
+            if(!foundSecond.Y)
+                points.second.Y = box.YMax;
             points.second.Z = z_2;
         }
         if(lower && !upper)
@@ -267,5 +302,5 @@ bool Photon::IntersecWithBox(const Box& box, std::pair<Point, Point>& points) co
         points.second = temp;
     }
     return true;
-
+    */
 }

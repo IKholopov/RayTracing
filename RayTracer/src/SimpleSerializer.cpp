@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include "KDTree.h"
+#include "SHATree.h"
+#include "SHAKDTree.h"
 #include "Sphere.h"
 #include "Polygon.h"
 #include "Parallelogram.h"
@@ -174,12 +176,14 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
         {
             Point p;
             Color light;
+            float intensity;
             stream >> p;
             stream >> light.R >> light.G >> light.B;
-            lights.push_back(new PointLight(p, light));
+            stream >> intensity;
+            lights.push_back(new PointLight(p, light, intensity));
         }
     }
-    auto tree = new KDTree(1.0, 1.0);
+    auto tree = new SHATree(1.0, 1.0, 2);
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
 }

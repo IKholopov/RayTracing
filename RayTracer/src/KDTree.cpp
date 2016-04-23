@@ -172,8 +172,8 @@ Color KDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lig
         Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
         if(this->CollideNode(root_, photon)->IsCollide)
             continue;
-        Color lColor = light->GetLight();
-        lColor.B *= (200.0f / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
+        Color lColor = light->GetLight().RGBtoHSV();
+        lColor.B *= (light->GetIntensity() / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
                 (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
         c = c + lColor;
     }

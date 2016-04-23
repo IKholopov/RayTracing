@@ -12,6 +12,7 @@ class Scene
     public:
         Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights);
         void RenderScene();
+        void SetView(IView* view);
     private:
         IGeometryHierarchy* hierarchy_;
         IView* view_;

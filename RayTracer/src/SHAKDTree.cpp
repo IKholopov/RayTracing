@@ -273,7 +273,7 @@ Color SHAKDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& 
         if(this->CollideNode(this->rootX_, this->rootY_, this->rootZ_, this->primaryBox_, photon)->IsCollide)
             continue;
         Color lColor = light->GetLight();
-        lColor.B *= (200.0f / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
+        lColor.B *= (light->GetIntensity() / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
                 (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
         c = c + lColor;
     }

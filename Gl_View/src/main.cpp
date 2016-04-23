@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "GLView.h"
-#include "Kernel.h"
+#include "RayTracerFactory.h"
 #include "SimpleSerializer.h"
 #include "STLBinarySerializer.h"
 
@@ -27,19 +27,20 @@ void display()
 int main( int argc, char **argv )
 {
     view = new GLView(W, H);
-    auto serializer = new STLBinarySerializer();
     if(argc < 2)
     {
         std::cerr << "No scene file to render" << std::endl;
         exit(1);
     }
-    Kernel kernel(view, serializer, argv[1]);
-    kernel.Run();
+    Kernel* kernel = RayTracerFactory::Instance()->GetKernel(argv[1], argv[2]);
+    kernel->SetView(view);
+    kernel->Run();
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
     glutInitWindowSize( W, H );
     glutCreateWindow( "RayTracer" );
     glutDisplayFunc( display );
     glutMainLoop();
+    delete kernel;
     return 0;
 }

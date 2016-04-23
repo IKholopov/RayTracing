@@ -351,7 +351,7 @@ CollisionData*SHATree::CollideNode(SHATree::SHANode* xNode, SHATree::SHANode* yN
     if(box.ZLength() > length)
         maxAxis = A_Z;
     Box b1, b2;
-    if((!xleaf || !yleaf || !zleaf) && (objects && objects->size() < 5));
+    if((!xleaf || !yleaf || !zleaf) && !(objects && objects->size() < 5));
     {
         if(!xleaf &&
                 ((zleaf && yleaf)|| maxAxis == A_X))
@@ -493,6 +493,7 @@ CollisionData*SHATree::CollideNode(SHATree::SHANode* xNode, SHATree::SHANode* yN
                         {
                             CollisionData* collInfo;
                             photon.IntersecWithBox(box, intersects);
+                            photon.IntersecWithBox(b2, b2Intersects);
                             if(b1.IsInside(photon.Position()) || !photon.IntersecWithBox(b2, b2Intersects) ||
                                            ((photon.IntersecWithBox(b1, b1Intersects) &&
                                             (b1Intersects.first - photon.Position()).Length()  <= (b2Intersects.first - photon.Position()).Length())))
@@ -527,7 +528,6 @@ CollisionData*SHATree::CollideNode(SHATree::SHANode* xNode, SHATree::SHANode* yN
             auto oldDist = (minCollision->CollisionPoint- photon.Position()).Length();
             if(! minCollision->IsCollide || newDist < oldDist)
             {
-
                 *minCollision = collision;
             }
         }
