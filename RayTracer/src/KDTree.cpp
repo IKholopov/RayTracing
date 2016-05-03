@@ -1,5 +1,5 @@
 #include "KDTree.h"
-
+/*
 #include <algorithm>
 #include <assert.h>
 #include <limits>
@@ -89,6 +89,54 @@ CollisionData*KDTree::CollidePhoton(const Photon& photon)
     return CollideNode(this->root_, photon);
 }
 
+bool KDTree::CheckCollide(const Photon& photon)
+{
+    return CheckCollide(root_, photon);
+}
+
+bool KDTree::CheckCollide(KDNode* node, const Photon& photon)
+{
+    std::pair<Point, Point> intersets;
+    if(!photon.IntersecWithBox(node->box, intersets))
+    {
+        return new CollisionData(false);
+    }
+    if(!node->leaf)
+    {
+        Box b1 = node->left->box;
+        Box b2 = node->right->box;
+        std::pair<Point, Point> b1Intersects;
+        std::pair<Point, Point> b2Intersects;
+
+        if(b1.IsInside(photon.Position()) || !photon.IntersecWithBox(b2, b2Intersects) ||
+                (photon.IntersecWithBox(b1, b1Intersects) &&
+                 (b1Intersects.first - photon.Position()).Length()  <= (b2Intersects.first - photon.Position()).Length()))
+        {
+            auto collLeft = this->CheckCollide(node->left, photon);
+            if(collLeft)
+                return collLeft;
+            return this->CheckCollide(node->right, photon);
+        }
+        else
+        {
+            auto collRight = this->CheckCollide(node->right, photon);
+            if(collRight)
+                return collRight;
+            return this->CheckCollide(node->left, photon);
+        }
+    }
+    CollisionData collision(false);
+    for(auto obj: node->objects)
+    {
+        if(obj->GetCollision(photon, collision) && obj != photon.Owner() &&
+                node->box.IsInside(collision.CollisionPoint))
+        {
+                return true;
+        }
+    }
+    return false;
+}
+
 unsigned int KDTree::Size()
 {
     return size_;
@@ -163,38 +211,13 @@ KDTree::KDNode*KDTree::DivideAndBuild(std::vector<std::pair<Box, ISceneObject*> 
 }
 
 
-Color KDTree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lights)
-{
-    Color c = collision.PixelColor.RGBtoHSV();
-    c.B = 0;
-    for(auto light: lights)
-    {
-        Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
-        if(this->CollideNode(root_, photon)->IsCollide)
-            continue;
-        Color lColor = light->GetLight().RGBtoHSV();
-        lColor.B *= (light->GetIntensity() / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
-                (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
-        c = c + lColor;
-    }
-    auto fin = c.HSVtoRGB();
-    return fin;
-}
-
-Color KDTree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
+CollisionData* KDTree::RenderPhoton(Photon photon)
 {
     Box box = this->primaryBox_;
     std::pair<Point, Point> intersects;
     if(!photon.IntersecWithBox(box, intersects))
-        return Color(0, 0, 0);
-    auto minCollision = this->CollideNode(root_, photon);
-    Color color;
-    if(minCollision->IsCollide)
-        color = this->EmitLights(*minCollision, lights);
-    else
-        color = minCollision->PixelColor;
-    delete minCollision;
-    return color;
+        return new CollisionData(false);
+    return this->CollideNode(root_, photon);
 }
 
 float KDTree::GetBoxValueMaxFromAxis(const Box& box, Axis axis) const
@@ -245,7 +268,7 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
                  (b1Intersects.first - photon.Position()).Length()  <= (b2Intersects.first - photon.Position()).Length()))
         {
             auto collLeft = this->CollideNode(node->left, photon);
-            if(collLeft->IsCollide && collLeft->CollisionPoint.GetAxis(node->axis) < node->plane)
+            if(collLeft->IsCollide) //&& collLeft->CollisionPoint.GetAxis(node->axis) < node->plane)
                 return collLeft;
             delete collLeft;
             return this->CollideNode(node->right, photon);
@@ -253,7 +276,7 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
         else
         {
             auto collRight = this->CollideNode(node->right, photon);
-            if(collRight->IsCollide && collRight->CollisionPoint.GetAxis(node->axis) > node->plane)
+            if(collRight->IsCollide) //&& collRight->CollisionPoint.GetAxis(node->axis) > node->plane)
                 return collRight;
             delete collRight;
             return this->CollideNode(node->left, photon);
@@ -263,7 +286,8 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
     CollisionData collision(false);
     for(auto obj: node->objects)
     {
-        if(obj->GetCollision(photon, collision) && obj != photon.Owner())
+        if(obj->GetCollision(photon, collision) && obj != photon.Owner() && node->box.IsInside(collision.CollisionPoint) &&
+                (photon.GetMinDist() < 0 || photon.GetMinDist() > (photon.Position() - collision.CollisionPoint).Length()))
         {
             if(!minCollision->IsCollide || (collision.CollisionPoint - photon.Position()).Length() <
                     (minCollision->CollisionPoint - photon.Position()).Length())
@@ -274,3 +298,4 @@ CollisionData*KDTree::CollideNode(KDTree::KDNode* node, const Photon& photon)
     }
     return minCollision;
 }
+*/

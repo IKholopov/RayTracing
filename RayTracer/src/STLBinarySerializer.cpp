@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <iostream>
 
-#include "KDTree.h"
-#include "SHATree.h"
-#include "SHAKDTree.h"
+//#include "KDTree.h"
+//#include "SHATree.h"
+//#include "SHAKDTree.h"
+#include "KDFairTree.h"
 #include "Sphere.h"
 #include "Polygon.h"
 #include "Parallelogram.h"
@@ -24,7 +25,7 @@ Scene* STLBinarySerializer::LoadScene(std::__cxx11::string filepath, IView* view
                                 Point(-3, 1, -2), Point(3, 1, -2)));
     std::vector<ISceneObject*> objects;
     std::vector<PointLight*> lights;
-    lights.push_back(new PointLight(Point(2, 0, 10), Color(1, 1, 1), 100));
+    lights.push_back(new PointLight(Point(2, 0, 10), Color(1, 1, 1), 300));
     lights.push_back(new PointLight(Point(-10, -10, 20), Color(1, 1, 1), 100));
     lights.push_back(new PointLight(Point(-10, 40, 20), Color(1, 1, 1), 100));
     char title[80];
@@ -44,7 +45,7 @@ Scene* STLBinarySerializer::LoadScene(std::__cxx11::string filepath, IView* view
                 objects.push_back(obj);
     }
     fclose(f);
-    auto tree = new SHAKDTree(10.0, 1.0, 2);//KDTree(10.0, 1.0);//
+    auto tree = new KDFairTree(10);//KDTree(10.0, 1.0);//
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
 }

@@ -54,7 +54,7 @@ Parallelogram::Parallelogram(Point pivot, Point left, Point right,
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Parallelogram::GetBoundingBox()
+Box Parallelogram::GetBoundingBox() const
 {
     return boundingBox_;
 }
@@ -93,10 +93,12 @@ bool Parallelogram::GetCollision(Photon photon, CollisionData& collision)
         {
             collision.PixelColor = outterMaterial_->GetSelfColor();
             collision.CollisionNormal = norm;
+            collision.Material = this->outterMaterial_;
         }
         else
         {
-            collision.PixelColor = outterMaterial_->GetSelfColor();
+            collision.Material = this->innerMaterial_;
+            collision.PixelColor = innerMaterial_->GetSelfColor();
             collision.CollisionNormal = norm*(-1);\
         }
         return true;

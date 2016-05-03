@@ -5,14 +5,17 @@
 
 #include "Base.h"
 #include "Photon.h"
+#include "IGeometryHierarchy.h"
+#include "PointLight.h"
 
 class Photon;
+class PointLight;
 
 class IMaterial
 {
     public:
         virtual ~IMaterial() {}
-        virtual void GetNextPhotons(std::vector<Photon>& photons) = 0;
+        virtual Color RenderMaterial(IGeometryHierarchy& hierarchy, CollisionData* data, std::vector<PointLight*>& lights) = 0;
         virtual Color GetSelfColor() = 0;
 };
 

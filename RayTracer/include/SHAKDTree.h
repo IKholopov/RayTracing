@@ -31,11 +31,13 @@ class SHAKDTree: public IGeometryHierarchy
                                 std::vector<std::pair<Box, ISceneObject*>>::const_iterator minRight,
                                float min, float max, unsigned int depth);
         Color EmitLights(CollisionData& collision, std::vector<PointLight*>& lights);
-        Color RenderPhoton(Photon photon, std::vector<PointLight*>& lights);
+        CollisionData* RenderPhoton(Photon photon);
 
         float GetBoxValueMaxFromAxis(const Box& box, Axis axis) const;
         float GetBoxValueMinFromAxis(const Box& box, Axis axis) const;
         CollisionData* CollideNode(SHAKDNode* xNode, SHAKDNode* yNode, SHAKDNode* zNode,
+                                   Box box, const Photon& photon);
+        bool CheckCollide(SHAKDNode* xNode, SHAKDNode* yNode, SHAKDNode* zNode,
                                    Box box, const Photon& photon);
         SHAKDNode* rootX_;
         SHAKDNode* rootY_;

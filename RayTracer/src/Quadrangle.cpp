@@ -53,7 +53,7 @@ Quadrangle::Quadrangle(Point p1, Point p2, Point p3, Point p4,
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Quadrangle::GetBoundingBox()
+Box Quadrangle::GetBoundingBox() const
 {
     return boundingBox_;
 }
@@ -90,12 +90,14 @@ bool Quadrangle::GetCollision(Photon photon, CollisionData& collision)
         collision.CollisionPoint = intersecPoint;
         if(height * norm < 0)
         {
+            collision.Material = this->outterMaterial_;
             collision.PixelColor = outterMaterial_->GetSelfColor();
             collision.CollisionNormal = norm;
         }
         else
         {
-            collision.PixelColor = outterMaterial_->GetSelfColor();
+            collision.Material = this->innerMaterial_;
+            collision.PixelColor = innerMaterial_->GetSelfColor();
             collision.CollisionNormal = norm*(-1);\
         }
         return true;

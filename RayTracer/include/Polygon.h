@@ -8,7 +8,7 @@ class Polygon: public ISceneObject
     public:
         Polygon(Point p1, Point p2, Point p3,
                 IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
-        Box GetBoundingBox();
+        Box GetBoundingBox() const;
         bool GetCollision(Photon photon, CollisionData& collision);
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);

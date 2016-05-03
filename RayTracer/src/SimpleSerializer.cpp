@@ -3,9 +3,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "KDTree.h"
-#include "SHATree.h"
-#include "SHAKDTree.h"
+//#include "KDTree.h"
+//#include "SHATree.h"
+//#include "SHAKDTree.h"
+#include "KDFairTree.h"
 #include "Sphere.h"
 #include "Polygon.h"
 #include "Parallelogram.h"
@@ -183,7 +184,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             lights.push_back(new PointLight(p, light, intensity));
         }
     }
-    auto tree = new SHATree(1.0, 1.0, 2);
+    auto tree = new KDFairTree(10);
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
 }
@@ -195,10 +196,12 @@ IMaterial* SimpleSerializer::LoadMaterial(std::ifstream& stream)
     if(!s.compare("SimpleMaterial"))
     {
         Color color;
+        float alpha;
         stream >> color.R;
         stream >> color.G;
         stream >> color.B;
-        return new SimpleMaterial(color);
+        stream >> alpha;
+        return new SimpleMaterial(color, alpha / 100);
     }
     else
     {

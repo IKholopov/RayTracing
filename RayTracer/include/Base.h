@@ -23,6 +23,7 @@ struct Color
         float B;
         Color RGBtoHSV();
         Color HSVtoRGB();
+        Color AddWithIntensivity(Color color, float a);
         Color operator + (Color& a);
         Color operator + (Color&& a);
         Color operator * (float a);

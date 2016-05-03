@@ -4,17 +4,10 @@ Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vec
     hierarchy_(hierarchy), lights_(lights)
 {}
 
-void RenderPixel(Camera& camera, IGeometryHierarchy* hierarchy, IView* view, std::vector<PointLight*>& lights,
+void RenderPixelTask(Scene* scene,
                  unsigned int x, unsigned int y)
 {
-    if(x == 420 && y == 235)
-        int a = 0;
-    auto photon = camera.GetPhotonForPixel(x, y);
-    auto color = hierarchy->RenderPhoton(photon, lights);
-    view->UpdatePixel(x, y, color);
-    x = 420;
-    y = 235;
-    view->UpdatePixel(x, y, Color(1, 0, 0));
+    scene->RenderPixel(x, y);
 }
 
 void Scene::RenderScene()
@@ -24,7 +17,7 @@ void Scene::RenderScene()
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {
             pool.AddTask([this, x, y](){
-                RenderPixel(this->camera_, hierarchy_, view_, lights_, x, y);
+                RenderPixelTask(this, x, y);
             });
         }
     Color matrix[view_->GetResolution().Height*view_->GetResolution().Width];
@@ -98,6 +91,7 @@ void Scene::RenderScene()
                 matrix[(view_->GetResolution().Width*y + x)] = c;
             });
         }
+    pool.WaitAll();
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {
@@ -108,7 +102,49 @@ void Scene::RenderScene()
     pool.Terminate();
 }
 
+void Scene::RenderPixel(unsigned int x, unsigned int y)
+{
+    auto photon = camera_.GetPhotonForPixel(x, y);
+    auto collision = hierarchy_->RenderPhoton(photon);
+    if(!collision->IsCollide)
+    {
+        view_->UpdatePixel(x, y, Color(0, 0, 0));
+        return;
+    }
+    collision->Depth = 0;
+    collision->PhotonDirection = photon.Direction();
+    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_);
+    view_->UpdatePixel(x, y, collision->PixelColor);
+/*    x = 310;
+    y = 100;
+    photon = camera_.GetPhotonForPixel(x, y);
+    collision = hierarchy_->RenderPhoton(photon);
+    collision->PhotonDirection = photon.Direction();
+    collision->Depth = 0;
+    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_);
+
+    view_->UpdatePixel(x, y, Color(1, 1, 1));*/
+}
+
 void Scene::SetView(IView* view)
 {
     this->view_ = view;
+}
+
+Color Scene::EmitLights(CollisionData& collision)
+{
+    Color c = collision.PixelColor.RGBtoHSV();
+    c.B = 0;
+    for(auto light: lights_)
+    {
+        Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
+        if(hierarchy_->RenderPhoton(photon)->IsCollide)
+            continue;
+        Color lColor = light->GetLight().RGBtoHSV();
+        lColor.B *= (light->GetIntensity() / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
+                (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
+        c = c + lColor;
+    }
+    collision.PixelColor = c.HSVtoRGB();
+    return collision.PixelColor;
 }

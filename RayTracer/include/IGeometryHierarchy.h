@@ -5,12 +5,17 @@
 #include "Photon.h"
 #include "PointLight.h"
 #include "ISceneObject.h"
+#include "CollisionData.h"
+
+class Photon;
+class ISceneObject;
+class CollisionData;
 
 class IGeometryHierarchy
 {
     public:
         virtual ~IGeometryHierarchy() {};
-        virtual Color RenderPhoton(Photon photon, std::vector<PointLight*>& lights) = 0;
+        virtual CollisionData* RenderPhoton(Photon photon) = 0;
         virtual void Initialize(std::vector<ISceneObject*>& objects) = 0;
 };
 

@@ -168,9 +168,9 @@ float Box::ZLength()
 
 bool Box::IsInside(Point point)
 {
-    if(point.X <= XMax && point.X >= XMin &&
-            point.Y <= YMax && point.Y >= YMin &&
-            point.Z <= ZMax && point.Z >= ZMin)
+    if((point.X < XMax || IsFloatZero(point.X - XMax)) && (point.X >= XMin  || IsFloatZero(point.X - XMin)) &&
+            (point.Y <= YMax  || IsFloatZero(point.Y - YMax)) && (point.Y >= YMin  || IsFloatZero(point.Y - YMin))&&
+            (point.Z <= ZMax  || IsFloatZero(point.Z - ZMax)) && (point.Z >= ZMin  || IsFloatZero(point.Z - ZMin)))
         return true;
     return false;
 }
@@ -262,6 +262,13 @@ Color Color::HSVtoRGB()
         }
     }
     return result;
+}
+
+Color Color::AddWithIntensivity(Color color, float a)
+{
+    Color c = color.RGBtoHSV();
+    c.B = a;
+    return *this + c.HSVtoRGB();
 }
 
 Color Color::operator +(Color& a)

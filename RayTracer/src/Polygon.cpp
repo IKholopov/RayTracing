@@ -39,7 +39,7 @@ Polygon::Polygon(Point p1, Point p2, Point p3, IMaterial* outterMaterial, IMater
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Polygon::GetBoundingBox()
+Box Polygon::GetBoundingBox() const
 {
     return boundingBox_;
 }
@@ -74,6 +74,7 @@ bool Polygon::GetCollision(Photon photon, CollisionData& collision)
         collision.CollisionPoint = intersecPoint;
         if(height * norm < 0)
         {
+            collision.Material = this->outterMaterial_;
             if(outterMaterial_== nullptr)
                 collision.PixelColor = Color(1, 1, 1);
             else
@@ -82,6 +83,7 @@ bool Polygon::GetCollision(Photon photon, CollisionData& collision)
         }
         else
         {
+            collision.Material = this->innerMaterial_;
             if(innerMaterial_== nullptr)
                 collision.PixelColor = Color(1, 1, 1);
             else collision.PixelColor = innerMaterial_->GetSelfColor();

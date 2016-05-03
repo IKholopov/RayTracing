@@ -1,5 +1,5 @@
 #include "SHATree.h"
-
+/*
 #include <algorithm>
 #include <assert.h>
 
@@ -245,25 +245,7 @@ SHATree::SHANode*SHATree::DivideAndBuild(SHATree::Axis axis, std::vector<std::pa
     return node;
 }
 
-Color SHATree::EmitLights(CollisionData& collision, std::vector<PointLight*>& lights)
-{
-    Color c = collision.PixelColor.RGBtoHSV();
-    c.B = 0;
-    for(auto light: lights)
-    {
-        Photon photon(collision.CollisionPoint, light->GetPosition() - collision.CollisionPoint, collision.Owner);
-        if(this->CollideNode(this->rootX_, this->rootY_, this->rootZ_, this->primaryBox_, photon)->IsCollide)
-            continue;
-        Color lColor = light->GetLight();
-        lColor.B *= (200.0f / std::pow((light->GetPosition() - collision.CollisionPoint).Length(),2))*
-                (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
-        c = c + lColor;
-    }
-    auto fin = c.HSVtoRGB();
-    return fin;
-}
-
-Color SHATree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
+CollisionData* SHATree::RenderPhoton(Photon photon)
 {
     Box box = this->primaryBox_;
     auto xNode = rootX_;
@@ -271,15 +253,8 @@ Color SHATree::RenderPhoton(Photon photon, std::vector<PointLight*>& lights)
     auto zNode = rootZ_;
     std::pair<Point, Point> intersects;
     if(!photon.IntersecWithBox(box, intersects))
-        return Color(0, 0, 0);
-    auto minCollision = this->CollideNode(xNode, yNode, zNode, box, photon);
-    Color color;
-    if(minCollision->IsCollide)
-        color = this->EmitLights(*minCollision, lights);
-    else
-        color = minCollision->PixelColor;
-    delete minCollision;
-    return color;
+        return new CollisionData(false);
+    return this->CollideNode(xNode, yNode, zNode, box, photon);
 }
 
 float SHATree::GetBoxValueMaxFromAxis(const Box& box, SHATree::Axis axis) const
@@ -534,3 +509,4 @@ CollisionData*SHATree::CollideNode(SHATree::SHANode* xNode, SHATree::SHANode* yN
     }
     return minCollision;
 }
+*/

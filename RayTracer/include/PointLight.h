@@ -2,6 +2,11 @@
 #define POINT_LIGHT_H
 
 #include "Base.h"
+#include "CollisionData.h"
+#include "IGeometryHierarchy.h"
+
+class CollisionData;
+class IGeometryHierarchy;
 
 class PointLight
 {
@@ -10,6 +15,7 @@ class PointLight
         Point GetPosition();
         Color GetLight();
         float GetIntensity();
+        Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy);
     private:
         Point position_;
         float intensity_;
