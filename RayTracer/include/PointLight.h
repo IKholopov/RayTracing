@@ -8,6 +8,17 @@
 class CollisionData;
 class IGeometryHierarchy;
 
+class LightReference
+{
+    public:
+        LightReference(float intensity, float distance);
+        float GetIntensity();
+        float GetDistance();
+    private:
+        float intensity_;
+        float distance_;
+};
+
 class PointLight
 {
     public:
@@ -15,7 +26,7 @@ class PointLight
         Point GetPosition();
         Color GetLight();
         float GetIntensity();
-        Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy);
+        Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy, LightReference& reference);
     private:
         Point position_;
         float intensity_;

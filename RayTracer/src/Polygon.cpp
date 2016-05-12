@@ -105,6 +105,45 @@ void Polygon::SetInnerMaterial(IMaterial* material)
     this->innerMaterial_ = material;
 }
 
+void Polygon::ApplyTransform(Transform A)
+{
+    p1_ = A.Apply(p1_);
+    p2_ = A.Apply(p2_);
+    p3_ = A.Apply(p3_);
+    float XMax, YMax, ZMax, XMin, YMin, ZMin;
+    XMax = p1_.X;
+    if(p2_.X > XMax)
+        XMax = p2_.X;
+    if(p3_.X > XMax)
+        XMax = p3_.X;
+    YMax = p1_.Y;
+    if(p2_.Y > YMax)
+        YMax = p2_.Y;
+    if(p3_.Y > YMax)
+        YMax = p3_.Y;
+    ZMax = p1_.Z;
+    if(p2_.Z > ZMax)
+        ZMax = p2_.Z;
+    if(p3_.Z > ZMax)
+        ZMax = p3_.Z;
+    XMin = p1_.X;
+    if(p2_.X < XMin)
+        XMin = p2_.X;
+    if(p3_.X < XMin)
+        XMin = p3_.X;
+    YMin = p1_.Y;
+    if(p2_.Y < YMin)
+        YMin = p2_.Y;
+    if(p3_.Y < YMin)
+        YMin = p3_.Y;
+    ZMin = p1_.Z;
+    if(p2_.Z < ZMin)
+        ZMin = p2_.Z;
+    if(p3_.Z < ZMin)
+        ZMin = p3_.Z;
+    boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
+}
+
 Point Polygon::GetNormal()
 {
     return ((p2_ - p1_) ^ (p3_ - p1_)).Normalized();

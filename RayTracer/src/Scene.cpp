@@ -1,7 +1,11 @@
 #include "Scene.h"
 
 Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights):camera_(camera), view_(view),
-    hierarchy_(hierarchy), lights_(lights)
+    hierarchy_(hierarchy), lights_(lights), reference_(LightReference(1, 100))
+{}
+
+Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights, LightReference reference):camera_(camera), view_(view),
+    hierarchy_(hierarchy), lights_(lights), reference_(reference)
 {}
 
 void RenderPixelTask(Scene* scene,
@@ -20,7 +24,7 @@ void Scene::RenderScene()
                 RenderPixelTask(this, x, y);
             });
         }
-    Color matrix[view_->GetResolution().Height*view_->GetResolution().Width];
+    Color* matrix = new Color[view_->GetResolution().Height*view_->GetResolution().Width];
     pool.WaitAll();
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
@@ -99,6 +103,8 @@ void Scene::RenderScene()
                 this->view_->UpdatePixel(x,y, matrix[(view_->GetResolution().Width*y + x)]);
             });
         }
+    pool.WaitAll();
+    delete matrix;
     pool.Terminate();
 }
 
@@ -113,22 +119,19 @@ void Scene::RenderPixel(unsigned int x, unsigned int y)
     }
     collision->Depth = 0;
     collision->PhotonDirection = photon.Direction();
-    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_);
+    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
     view_->UpdatePixel(x, y, collision->PixelColor);
-/*    x = 310;
-    y = 100;
-    photon = camera_.GetPhotonForPixel(x, y);
-    collision = hierarchy_->RenderPhoton(photon);
-    collision->PhotonDirection = photon.Direction();
-    collision->Depth = 0;
-    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_);
-
-    view_->UpdatePixel(x, y, Color(1, 1, 1));*/
 }
 
 void Scene::SetView(IView* view)
 {
     this->view_ = view;
+    this->camera_.SetResolution(view->GetResolution());
+}
+
+void Scene::SetConfig(RenderConfig config)
+{
+    this->config_ = config;
 }
 
 Color Scene::EmitLights(CollisionData& collision)

@@ -201,7 +201,7 @@ IMaterial* SimpleSerializer::LoadMaterial(std::ifstream& stream)
         stream >> color.G;
         stream >> color.B;
         stream >> alpha;
-        return new SimpleMaterial(color, alpha / 100);
+        return new SimpleMaterial(color, alpha / 100, 0);
     }
     else
     {

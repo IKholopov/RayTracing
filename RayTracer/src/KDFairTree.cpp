@@ -75,87 +75,98 @@ void KDFairTree::Initialize(std::vector<ISceneObject*>& objects)
             primaryBox.ZMin = box.ZMin;
     }
     this->primaryBox_ = primaryBox;
-    root_ = DivideAndBuild(objects, primaryBox, 1);
+    root_ = DivideAndBuild(objects, primaryBox, 1, Axis::A_X, 1);
 }
 
-KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth)
+KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth, Axis axis, bool divideByMax)
 {
-    auto minAxis = Axis::A_X;
-    if(box.YLength() > box.XLength())
-        minAxis = A_Y;
-    if(box.ZLength() > box.YLength() && box.ZLength() > box.XLength())
-        minAxis = A_Z;
-    if(minAxis == A_X)
-    {
-        std::sort(objects.begin(), objects.end(), sortXMax());
-    }
-    else if(minAxis == A_Y)
-    {
-        std::sort(objects.begin(), objects.end(), sortYMax());
-    }
-    else
-    {
-        std::sort(objects.begin(), objects.end(), sortZMax());
-    }
-    /*
-    long leftObjects = 0;
-    long rightObjects = objects.size();
-    float optimalSplit = objects[0]->GetBoundingBox().GetMax(minAxis);
-    float sah = leftObjects*(objects[0]->GetBoundingBox().GetMax(minAxis) - box.GetMin(minAxis)) +
-                rightObjects*(box.GetMax(minAxis) - objects[0]->GetBoundingBox().GetMax(minAxis));
-    for(auto obj = objects.begin(); obj != objects.end() - 1; ++obj)
-    {
-        ++leftObjects;
-        --rightObjects;
-        float split = (*obj)->GetBoundingBox().GetMax(minAxis);
-        auto surfLeft = ((*obj)->GetBoundingBox().GetMax(minAxis) - box.GetMin(minAxis));
-        auto surfRight = (box.GetMax(minAxis) - (*obj)->GetBoundingBox().GetMax(minAxis));
-        float newSah = leftObjects*surfLeft +
-                rightObjects*surfRight;
-        if(newSah < sah){
-            optimalSplit = split;
-            sah = newSah;
-        }
-    }
-    if(minAxis == A_X)
-    {
-        std::sort(objects.begin(), objects.end(), sortXMin());
-    }
-    else if(minAxis == A_Y)
-    {
-        std::sort(objects.begin(), objects.end(), sortYMin());
-    }
-    else
-    {
-        std::sort(objects.begin(), objects.end(), sortZMin());
-    }
-    leftObjects = -1;
-    rightObjects = objects.size();
-    for(auto obj = objects.begin(); obj != objects.end() - 1; ++obj)
-    {
-        ++leftObjects;
-        --rightObjects;
-        float split = (*obj)->GetBoundingBox().GetMin(minAxis);
-        float newSah = leftObjects*((*obj)->GetBoundingBox().GetMin(minAxis) - box.GetMin(minAxis)) +
-                rightObjects*(box.GetMax(minAxis) - (*obj)->GetBoundingBox().GetMin(minAxis));
-        if(newSah < sah){
-            optimalSplit = split;
-            sah = newSah;
-        }
-    }*/
-    std::vector<ISceneObject*> left, right;
-    float optimalSplit = box.GetMid(minAxis);
-    for(auto obj: objects)
-    {
-        if(obj->GetBoundingBox().GetMin(minAxis) <= optimalSplit)
-            left.push_back(obj);
-        if(obj->GetBoundingBox().GetMax(minAxis) >= optimalSplit)
-            right.push_back(obj);
-    }
     auto node = new KDFairNode();
     node->box = box;
     node->size = objects.size();
-    if(depth > this->depth_ )//|| left.size() > 0.9 * objects.size() && right.size() > 0.9 * objects.size() )
+    if(objects.size() < 4)
+    {
+        node->leaf = true;
+        for(auto obj: objects)
+            node->objects.push_back(obj);
+        return node;
+    }
+    float optimalSplit ;
+    if(depth > 10)
+        optimalSplit = box.GetMid(axis);
+    else {
+        std::vector<ISceneObject*>& minSorted(objects);
+        if(axis == A_X)
+        {
+            std::sort(objects.begin(), objects.end(), sortXMax());
+            std::sort(minSorted.begin(), minSorted.end(), sortXMin());
+        }
+        else if(axis == A_Y)
+        {
+            std::sort(objects.begin(), objects.end(), sortYMax());
+            std::sort(minSorted.begin(), minSorted.end(), sortYMin());
+        }
+        else
+        {
+            std::sort(objects.begin(), objects.end(), sortZMax());
+            std::sort(minSorted.begin(), minSorted.end(), sortZMin());
+        }
+        long leftObjects = 0;
+        long rightObjects = objects.size();
+        optimalSplit = objects[0]->GetBoundingBox().GetMax(axis);
+        float sah = std::numeric_limits<float>::max();
+        if(divideByMax)
+        {
+            auto minBorder = minSorted.begin();
+            for(auto obj = objects.begin(); obj != objects.end() - 1; ++obj)
+            {
+                float split = (*obj)->GetBoundingBox().GetMax(axis) + 0.0001;
+                while(minBorder != minSorted.end() && (*minBorder)->GetBoundingBox().GetMin(axis) < split)
+                {
+                    ++minBorder;
+                    leftObjects++;
+                }
+                rightObjects--;
+                auto surfLeft = ((*obj)->GetBoundingBox().GetMax(axis) - box.GetMin(axis));
+                auto surfRight = (box.GetMax(axis) - (*obj)->GetBoundingBox().GetMax(axis));
+                float newSah = leftObjects*surfLeft +
+                        rightObjects*surfRight;
+                if(newSah < sah){
+                    optimalSplit = split;
+                    sah = newSah;
+                }
+            }
+        }
+        else
+        {
+            auto minBorder = objects.begin();
+            for(auto obj = minSorted.begin(); obj != minSorted.end() - 1; ++obj)
+            {
+                leftObjects++;
+                float split = (*obj)->GetBoundingBox().GetMin(axis) - 0.0001;
+                while(minBorder != objects.end() && (*minBorder)->GetBoundingBox().GetMax(axis) < split)
+                {
+                    ++minBorder;
+                    rightObjects--;
+                }
+                float newSah = leftObjects*((*obj)->GetBoundingBox().GetMin(axis) - box.GetMin(axis)) +
+                        rightObjects*(box.GetMax(axis) - (*obj)->GetBoundingBox().GetMin(axis));
+                if(newSah < sah){
+                    optimalSplit = split;
+                    sah = newSah;
+                }
+            }
+        }
+    }
+    std::vector<ISceneObject*> left, right;
+    for(auto obj: objects)
+    {
+        if(obj->GetBoundingBox().GetMin(axis) <= optimalSplit)
+            left.push_back(obj);
+        if(obj->GetBoundingBox().GetMax(axis) >= optimalSplit)
+            right.push_back(obj);
+    }
+    if(depth > this->depth_)//|| left.size() == 0 || right.size() == 0 ||
+        //left.size() == objects.size() || right.size() == objects.size())
     {
         node->leaf = true;
         for(auto obj: objects)
@@ -164,13 +175,14 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(std::vector<ISceneObject*>& o
     }
     node->leaf = false;
     node->plane = optimalSplit;
-    node->axis = minAxis;
+    node->axis = axis;
     Box leftBox = box;
-    leftBox.SetAxisMax(minAxis, optimalSplit);
+    leftBox.SetAxisMax(axis, optimalSplit);
     Box rightBox = box;
-    rightBox.SetAxisMin(minAxis, optimalSplit);
-    node->left = DivideAndBuild(left, leftBox, depth+1);
-    node->right = DivideAndBuild(right, rightBox, depth+1);
+    rightBox.SetAxisMin(axis, optimalSplit);
+
+    node->left = DivideAndBuild(left, leftBox, depth+1, (Axis)((axis+1)%3), !divideByMax);
+    node->right = DivideAndBuild(right, rightBox, depth+1, (Axis)((axis+1)%3), !divideByMax);
 
     return node;
 }
@@ -182,7 +194,7 @@ CollisionData*KDFairTree::RenderPhoton(Photon photon)
 
 CollisionData*KDFairTree::CollideNode(KDFairTree::KDFairNode* node, const Photon& photon)
 {
-if(!photon.IntersecWithBox(node->box))
+    if(!photon.IntersecWithBox(node->box))
         return new CollisionData(false);
     if(!node->leaf)
     {

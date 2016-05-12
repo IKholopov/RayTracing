@@ -117,6 +117,13 @@ void Parallelogram::SetInnerMaterial(IMaterial* material)
     this->innerMaterial_ = material;
 }
 
+void Parallelogram::ApplyTransform(Transform A)
+{
+    pivot_ = A.Apply(pivot_);
+    left_ = A.Apply(left_);
+    right_ = A.Apply(right_);
+}
+
 Point Parallelogram::GetNormal()
 {
     return ((right_ - pivot_) ^ (left_ - pivot_)).Normalized();

@@ -116,6 +116,14 @@ void Quadrangle::SetInnerMaterial(IMaterial* material)
     this->innerMaterial_ = material;
 }
 
+void Quadrangle::ApplyTransform(Transform A)
+{
+    p1_ = A.Apply(p1_);
+    p2_ = A.Apply(p2_);
+    p3_ = A.Apply(p3_);
+    p4_ = A.Apply(p4_);
+}
+
 Point Quadrangle::GetNormal()
 {
     return ((p2_- p1_) ^ (p3_ - p1_)).Normalized();

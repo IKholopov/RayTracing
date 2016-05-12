@@ -7,13 +7,14 @@ class SimpleMaterial:public IMaterial
 {
     public:
         SimpleMaterial(Color color);
-        SimpleMaterial(Color color, float alpha);
-        Color RenderMaterial(IGeometryHierarchy& hierarchy, CollisionData* data, std::vector<PointLight*>& lights);
+        SimpleMaterial(Color color, float alpha, float n);
+        Color RenderMaterial(IGeometryHierarchy& hierarchy, CollisionData* data, std::vector<PointLight*>& lights, RenderConfig& config, LightReference& reference);
         Color GetSelfColor();
 
     private:
         Color color_;
         float alpha_;
+        float n_;
 };
 
 #endif

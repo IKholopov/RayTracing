@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "ISerializer.h"
+#include "RenderConfig.h"
 
 class Kernel
 {
@@ -16,6 +17,7 @@ class Kernel
         void RunScene();
         void LoadScene(ISerializer* serializer, std::string sceneFilePath);
         void SetView(IView* view);
+        void SetConfig(RenderConfig config);
     private:
         IView* view_;
         Scene* scene_;

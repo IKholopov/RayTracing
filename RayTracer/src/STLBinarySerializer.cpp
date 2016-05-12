@@ -26,8 +26,8 @@ Scene* STLBinarySerializer::LoadScene(std::__cxx11::string filepath, IView* view
     std::vector<ISceneObject*> objects;
     std::vector<PointLight*> lights;
     lights.push_back(new PointLight(Point(2, 0, 10), Color(1, 1, 1), 300));
-    lights.push_back(new PointLight(Point(-10, -10, 20), Color(1, 1, 1), 100));
-    lights.push_back(new PointLight(Point(-10, 40, 20), Color(1, 1, 1), 100));
+    //lights.push_back(new PointLight(Point(-10, -10, 20), Color(1, 1, 1), 100));
+    //lights.push_back(new PointLight(Point(-10, 40, 20), Color(1, 1, 1), 100));
     char title[80];
     int nFaces;
     fread(title, 80, 1, f);
@@ -45,7 +45,36 @@ Scene* STLBinarySerializer::LoadScene(std::__cxx11::string filepath, IView* view
                 objects.push_back(obj);
     }
     fclose(f);
-    auto tree = new KDFairTree(10);//KDTree(10.0, 1.0);//
+    auto tree = new KDFairTree(12);//KDTree(10.0, 1.0);//
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights);
+}
+
+Model* STLBinarySerializer::LoadModel(std::__cxx11::string filepath)
+{
+    FILE* f;
+    if(!(f = fopen(filepath.c_str(), "r")))
+    {
+        std::cerr << "Can't open model file " << filepath << std::endl;
+        exit(1);
+    }
+    std::vector<ISceneObject*> objects;
+    char title[80];
+    int nFaces;
+    fread(title, 80, 1, f);
+    fread((void*)&nFaces, 4, 1, f);
+    float v[12];
+    unsigned short uint16;
+    for (size_t i=0; i<nFaces; ++i) {
+                for (size_t j=0; j<12; ++j) {
+                    fread((void*)&v[j], sizeof(float), 1, f);
+                }
+                fread((void*)&uint16, sizeof(unsigned short), 1, f);
+                auto obj = new Polygon(Point(v[3], v[4], v[5]), Point(v[6], v[7], v[8]), Point(v[9], v[10], v[11]));
+                obj->SetInnerMaterial(new SimpleMaterial(Color(0,0,1)));
+                obj->SetOutterMaterial(new SimpleMaterial(Color(0,0,1)));
+                objects.push_back(obj);
+    }
+    fclose(f);
+    return new Model(objects);
 }

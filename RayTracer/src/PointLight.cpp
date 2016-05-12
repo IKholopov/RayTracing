@@ -19,13 +19,13 @@ float PointLight::GetIntensity()
     return intensity_;
 }
 
-Color PointLight::EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy)
+Color PointLight::EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy, LightReference& reference)
 {
     Color c = collision.PixelColor;
     Photon photon(collision.CollisionPoint, this->GetPosition() - collision.CollisionPoint,
                   (this->GetPosition() - collision.CollisionPoint).Length(), collision.Owner);
     auto collData = hierarchy.RenderPhoton(photon);
-    if(collData->IsCollide && (this->GetPosition() - collision.CollisionPoint).Length() <=
+    if(collData->IsCollide && (this->GetPosition() - collision.CollisionPoint).Length() >=
             (collData->CollisionPoint - collision.CollisionPoint).Length())
     {
         delete collData;
@@ -33,10 +33,26 @@ Color PointLight::EmitLight(CollisionData& collision, IGeometryHierarchy& hierar
     }
     delete collData;
     Color lColor = this->GetLight().RGBtoHSV();
-    lColor.B *= (this->GetIntensity() / std::pow((this->GetPosition() - collision.CollisionPoint).Length(),2))*
-        (collision.CollisionNormal.Normalized()*photon.Direction().Normalized());
+    lColor.B *= std::fabs((this->GetIntensity() / std::pow((this->GetPosition() - collision.CollisionPoint).Length(),2))*
+        (collision.CollisionNormal.Normalized()*photon.Direction().Normalized()));
 
     c = c + lColor;
     collision.PixelColor = c;
     return collision.PixelColor;
+}
+
+LightReference::LightReference(float intensity, float distance):intensity_(intensity), distance_(distance)
+{
+
+}
+
+float LightReference::GetIntensity()
+{
+    return intensity_;
+
+}
+
+float LightReference::GetDistance()
+{
+    return distance_;
 }

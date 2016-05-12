@@ -5,7 +5,7 @@
 #include <istream>
 #include <cmath>
 
-enum Axis{ A_X, A_Y, A_Z};
+enum Axis{ A_X = 0, A_Y = 1, A_Z = 2};
 
 struct Resolution
 {

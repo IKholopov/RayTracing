@@ -70,3 +70,8 @@ void Sphere::SetInnerMaterial(IMaterial* material)
 {
     this->innerMaterial_ = material;
 }
+
+void Sphere::ApplyTransform(Transform A)
+{
+    this->position_ = A.Apply(this->position_);
+}

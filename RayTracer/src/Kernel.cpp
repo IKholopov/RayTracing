@@ -1,6 +1,5 @@
 #include "Kernel.h"
 
-#include "KDTree.h"
 #include "Sphere.h"
 #include "SimpleMaterial.h"
 
@@ -42,4 +41,9 @@ void Kernel::SetView(IView* view)
 {
     this->view_ = view;
     this->scene_->SetView(view);
+}
+
+void Kernel::SetConfig(RenderConfig config)
+{
+    this->scene_->SetConfig(config);
 }

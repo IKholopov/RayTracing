@@ -26,7 +26,7 @@ class KDFairTree: public IGeometryHierarchy
             std::vector<ISceneObject*> objects;
         };
 
-        KDFairNode* DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth);
+        KDFairNode* DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth, Axis axis, bool divideByMax);
         CollisionData* RenderPhoton(Photon photon);
         CollisionData* CollideNode(KDFairNode* node, const Photon& photon);
         //bool CheckCollide(KDFairNode* node, const Photon& photon);

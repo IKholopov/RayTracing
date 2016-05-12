@@ -7,8 +7,8 @@
 #include "SimpleSerializer.h"
 #include "STLBinarySerializer.h"
 
-const unsigned int W = 640;
-const unsigned int H = 480;
+const unsigned int W = 1280;
+const unsigned int H = 720;
 
 GLView* view;
 

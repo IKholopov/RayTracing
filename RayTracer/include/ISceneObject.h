@@ -5,6 +5,7 @@
 #include "CollisionData.h"
 #include "Photon.h"
 #include "IMaterial.h"
+#include "Transform.h"
 
 struct CollisionData;
 
@@ -14,6 +15,7 @@ class ISceneObject
         virtual ~ISceneObject() {};
         virtual Box GetBoundingBox() const = 0;
         virtual bool GetCollision(Photon photon, CollisionData& data) = 0;
+        virtual void ApplyTransform(Transform A) = 0;
 };
 
 #endif

@@ -13,6 +13,7 @@ class Quadrangle : public ISceneObject
         bool GetCollision(Photon photon, CollisionData& collision);
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);
+        void ApplyTransform(Transform A);
     private:
         Point GetNormal();
         Point p1_;
