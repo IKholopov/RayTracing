@@ -12,7 +12,7 @@ Sphere::Sphere(float radius, Point position, IMaterial* outterMaterial, IMateria
                (position_+az).Z, (position_-az).Z);
 }
 
-Box Sphere::GetBoundingBox() const
+const Box& Sphere::GetBoundingBox() const
 {
     return boundingBox_;
 }

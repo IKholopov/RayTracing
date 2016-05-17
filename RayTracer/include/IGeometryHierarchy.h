@@ -16,6 +16,7 @@ class IGeometryHierarchy
     public:
         virtual ~IGeometryHierarchy() {};
         virtual CollisionData* RenderPhoton(Photon photon) = 0;
+        virtual CollisionData* CheckCollide(const Photon& photon) = 0;
         virtual void Initialize(std::vector<ISceneObject*>& objects) = 0;
 };
 

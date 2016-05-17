@@ -44,6 +44,12 @@ Kernel*RayTracerFactory::GetKernel(std::__cxx11::string configPath, std::string 
             config >> depth;
             renderConfig.setReflectionDepth(depth);
         }
+        else if(!s.compare("refractionDepth"))
+        {
+            unsigned int depth;
+            config >> depth;
+            renderConfig.setRefractionDepth(depth);
+        }
     }
     kernel->SetConfig(renderConfig);
     return kernel;

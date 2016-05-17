@@ -39,7 +39,7 @@ Polygon::Polygon(Point p1, Point p2, Point p3, IMaterial* outterMaterial, IMater
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Polygon::GetBoundingBox() const
+const Box& Polygon::GetBoundingBox() const
 {
     return boundingBox_;
 }

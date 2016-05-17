@@ -43,3 +43,13 @@ void RenderConfig::setLight(bool light)
 {
     light_ = light;
 }
+
+unsigned int RenderConfig::refractionDepth() const
+{
+    return refractionDepth_;
+}
+
+void RenderConfig::setRefractionDepth(unsigned int refractionDepth)
+{
+    refractionDepth_ = refractionDepth;
+}

@@ -53,7 +53,7 @@ Quadrangle::Quadrangle(Point p1, Point p2, Point p3, Point p4,
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Quadrangle::GetBoundingBox() const
+const Box& Quadrangle::GetBoundingBox() const
 {
     return boundingBox_;
 }

@@ -16,7 +16,7 @@ void RenderPixelTask(Scene* scene,
 
 void Scene::RenderScene()
 {
-    ThreadPool pool(1);//std::thread::hardware_concurrency());
+    ThreadPool pool(2);//std::thread::hardware_concurrency());
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {
@@ -117,10 +117,24 @@ void Scene::RenderPixel(unsigned int x, unsigned int y)
         view_->UpdatePixel(x, y, Color(0, 0, 0));
         return;
     }
-    collision->Depth = 0;
+    collision->ReflectionDepth = 0;
+    collision->RefractionDepth = 0;
     collision->PhotonDirection = photon.Direction();
     collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
     view_->UpdatePixel(x, y, collision->PixelColor);
+    /*x = 620; y = 357;
+    photon = camera_.GetPhotonForPixel(x, y);
+    collision = hierarchy_->RenderPhoton(photon);
+    if(!collision->IsCollide)
+    {
+        view_->UpdatePixel(x, y, Color(1, 0, 0));
+        return;
+    }
+    collision->ReflectionDepth = 0;
+    collision->RefractionDepth = 0;
+    collision->PhotonDirection = photon.Direction();
+    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
+    view_->UpdatePixel(x, y, Color(1, 0, 0));*/
 }
 
 void Scene::SetView(IView* view)

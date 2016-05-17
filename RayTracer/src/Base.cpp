@@ -111,7 +111,7 @@ float Box::XLength()
     return XMax - XMin;
 }
 
-float Box::GetMid(Axis axis)
+float Box::GetMid(Axis axis) const
 {
     if(axis == A_X)
         return (XMax + XMin) / 2;
@@ -120,7 +120,7 @@ float Box::GetMid(Axis axis)
     return (ZMax + ZMin) / 2;
 }
 
-float Box::GetMax(Axis axis)
+float Box::GetMax(Axis axis) const
 {
     if(axis == A_X)
         return XMax;
@@ -129,7 +129,7 @@ float Box::GetMax(Axis axis)
     return ZMax;
 }
 
-float Box::GetMin(Axis axis)
+float Box::GetMin(Axis axis) const
 {
     if(axis == A_X)
         return XMin;

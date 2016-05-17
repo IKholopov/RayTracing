@@ -9,7 +9,7 @@ class Parallelogram : public ISceneObject
     public:
         Parallelogram(Point pivot, Point left, Point right,
                 IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
-        Box GetBoundingBox() const;
+        const Box& GetBoundingBox() const;
         bool GetCollision(Photon photon, CollisionData& collision);
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);

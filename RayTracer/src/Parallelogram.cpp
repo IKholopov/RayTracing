@@ -54,7 +54,7 @@ Parallelogram::Parallelogram(Point pivot, Point left, Point right,
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
-Box Parallelogram::GetBoundingBox() const
+const Box& Parallelogram::GetBoundingBox() const
 {
     return boundingBox_;
 }

@@ -26,7 +26,7 @@ class PointLight
         Point GetPosition();
         Color GetLight();
         float GetIntensity();
-        Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy, LightReference& reference);
+        Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy, LightReference& reference, Color original);
     private:
         Point position_;
         float intensity_;

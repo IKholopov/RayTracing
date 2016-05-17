@@ -17,7 +17,7 @@ struct CollisionData
     public:
         CollisionData(bool isCollide);
         CollisionData(bool isCollide, Color color, Point collisionPoint, Point collisionNormal,
-                      IMaterial* material, Point photonDirection, float depth = 0);
+                      IMaterial* material, Point photonDirection, float reflectionDepth = 0, float refractionDepth = 0);
         bool IsCollide;
         Color PixelColor;
         Point CollisionPoint;
@@ -26,7 +26,8 @@ struct CollisionData
         std::vector<Photon> Photons;
         IMaterial* Material;
         Point PhotonDirection;
-        float Depth;
+        float ReflectionDepth;
+        float RefractionDepth;
 };
 
 #endif

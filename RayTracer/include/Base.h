@@ -91,9 +91,9 @@ class Box
         float XLength();
         float YLength();
         float ZLength();
-        float GetMid(Axis axis);
-        float GetMax(Axis axis);
-        float GetMin(Axis axis);
+        float GetMid(Axis axis) const;
+        float GetMax(Axis axis) const;
+        float GetMin(Axis axis) const;
         void SetAxisMin(Axis axis, float val);
         void SetAxisMax(Axis axis, float val);
         bool IsInside(Point point);

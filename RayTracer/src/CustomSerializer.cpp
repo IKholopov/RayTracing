@@ -126,6 +126,16 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                             finishedEntry = true;
                             materials.insert(std::pair<std::string, IMaterial*>(name,
                                         new SimpleMaterial(color, reflect, refract)));
+                            if(IsFloatZero(refract))
+                            {
+                                materials.insert(std::pair<std::string, IMaterial*>(name + "_r",
+                                            new SimpleMaterial(color, reflect, refract)));
+                            }
+                            else
+                            {
+                                materials.insert(std::pair<std::string, IMaterial*>(name + "_r",
+                                            new SimpleMaterial(color, reflect, 1./refract)));
+                            }
                             break;
                         }
                     }
@@ -260,7 +270,7 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                         {
                             finishedSphere = true;
                             objects.push_back(new Sphere(radius, pos,
-                                                         materials.at(materialId), materials.at(materialId)));
+                                                         materials.at(materialId), materials.at(materialId + "_r")));
                             break;
                         }
                     }
@@ -293,7 +303,7 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                                 break;
                             finishedTriangle  = true;
                             objects.push_back(new Polygon(p[0], p[1], p[2],
-                                                         materials.at(materialId), materials.at(materialId)));
+                                                         materials.at(materialId), materials.at(materialId + "_r")));
                             break;
                         }
                     }
@@ -326,7 +336,7 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                                 break;
                             finishedQuadrangle = true;
                             objects.push_back(new Quadrangle(p[0], p[1], p[2], p[3],
-                                                         materials.at(materialId), materials.at(materialId)));
+                                                         materials.at(materialId), materials.at(materialId + "_r")));
                             break;
                         }
                     }
@@ -384,7 +394,7 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
         }
     }
 
-    auto tree = new KDFairTree(19);//KDTree(10.0, 1.0);//
+    auto tree = new KDFairTree(15);//KDTree(10.0, 1.0);//
     tree->Initialize(objects);
     return new Scene(*camera, view, tree, lights, reference);
 }

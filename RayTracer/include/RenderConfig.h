@@ -17,11 +17,15 @@ class RenderConfig
         bool light() const;
         void setLight(bool light);
 
+        unsigned int refractionDepth() const;
+        void setRefractionDepth(unsigned int refractionDepth);
+
     private:
         bool light_;
         bool reflection_;
         bool refraction_;
         unsigned int reflectionDepth_;
+        unsigned int refractionDepth_;
 };
 
 #endif

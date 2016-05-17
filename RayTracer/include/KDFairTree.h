@@ -11,9 +11,26 @@ class KDFairTree: public IGeometryHierarchy
         KDFairTree(int emptySpaceCost);
         void Initialize(std::vector<ISceneObject*>& objects);
         CollisionData* CollidePhoton(const Photon& photon);
-        bool CheckCollide(const Photon& photon);
+        CollisionData* CheckCollide(const Photon& photon);
         unsigned int Size();
+
     private:
+        class SortedArrays
+        {
+            public:
+                SortedArrays();
+                SortedArrays(std::vector<ISceneObject*>& objects);
+                std::vector<ISceneObject*> XMax;
+                std::vector<ISceneObject*> XMin;
+                std::vector<ISceneObject*> YMax;
+                std::vector<ISceneObject*> YMin;
+                std::vector<ISceneObject*> ZMax;
+                std::vector<ISceneObject*> ZMin;
+
+                void Split(Axis axis, float plane, SortedArrays& array1, SortedArrays& array2);
+                std::vector<ISceneObject*>& GetSortedMax(Axis axis);
+                std::vector<ISceneObject*>& GetSortedMin(Axis axis);
+        };
         struct KDFairNode{
             KDFairNode() {}
             float plane;
@@ -26,7 +43,9 @@ class KDFairTree: public IGeometryHierarchy
             std::vector<ISceneObject*> objects;
         };
 
-        KDFairNode* DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth, Axis axis, bool divideByMax);
+        CollisionData*CheckCollideNode(KDFairTree::KDFairNode* node, const Photon& photon);
+        KDFairNode* DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis, bool divideByMax);
+        //KDFairNode* DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth, Axis axis, bool divideByMax);
         CollisionData* RenderPhoton(Photon photon);
         CollisionData* CollideNode(KDFairNode* node, const Photon& photon);
         //bool CheckCollide(KDFairNode* node, const Photon& photon);

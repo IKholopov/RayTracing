@@ -13,7 +13,7 @@ class ISceneObject
 {
     public:
         virtual ~ISceneObject() {};
-        virtual Box GetBoundingBox() const = 0;
+        virtual const Box& GetBoundingBox() const = 0;
         virtual bool GetCollision(Photon photon, CollisionData& data) = 0;
         virtual void ApplyTransform(Transform A) = 0;
 };
