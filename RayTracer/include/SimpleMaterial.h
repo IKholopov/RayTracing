@@ -10,6 +10,8 @@ class SimpleMaterial:public IMaterial
         SimpleMaterial(Color color, float alpha, float n);
         Color RenderMaterial(IGeometryHierarchy& hierarchy, CollisionData* data, std::vector<PointLight*>& lights, RenderConfig& config, LightReference& reference);
         Color GetSelfColor();
+        float GetAlpha() const;
+        float GetN() const;
 
     private:
         Color color_;

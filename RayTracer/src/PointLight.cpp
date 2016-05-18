@@ -46,13 +46,13 @@ LightReference::LightReference(float intensity, float distance):intensity_(inten
 
 }
 
-float LightReference::GetIntensity()
+float LightReference::GetIntensity() const
 {
     return intensity_;
 
 }
 
-float LightReference::GetDistance()
+float LightReference::GetDistance() const
 {
     return distance_;
 }

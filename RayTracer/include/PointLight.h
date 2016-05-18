@@ -28,9 +28,7 @@ class PointLight
         Color GetLight();
         float GetIntensity();
         Color EmitLight(CollisionData& collision, IGeometryHierarchy& hierarchy,
-                        LightReference& reference, Color original, std::vector<PointLight*>& lights, RenderConfig& config);
-        float AbsorbLight(CollisionData& collision, IGeometryHierarchy& hierarchy,
-                        LightReference& reference, Color original, std::vector<PointLight*>& lights, RenderConfig& config);
+                        LightReference& reference, Color original);
         Point GetPosition() const;
 
     private:

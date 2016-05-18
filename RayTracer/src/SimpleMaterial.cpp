@@ -18,7 +18,8 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
     if(!IsFloatZero(this->n_) && config.refraction() && data->RefractionDepth < config.refractionDepth())
     {
         Photon refractPhoton(data->CollisionPoint, data->CollisionNormal * (data->PhotonDirection*data->CollisionNormal) +
-                             (data->PhotonDirection - data->CollisionNormal * (data->PhotonDirection*data->CollisionNormal))*this->n_, data->Owner);
+                             (data->PhotonDirection - data->CollisionNormal * (data->PhotonDirection*data->CollisionNormal.Normalized()))*
+                             (1.0/this->n_), data->Owner);
         auto refract = hierarchy.RenderPhoton(refractPhoton);
         refract->RefractionDepth = data->RefractionDepth + 1;
         if(refract->IsCollide)
@@ -77,4 +78,14 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
 Color SimpleMaterial::GetSelfColor()
 {
     return color_;
+}
+
+float SimpleMaterial::GetAlpha() const
+{
+    return this->alpha_;
+}
+
+float SimpleMaterial::GetN() const
+{
+    return this->n_;
 }

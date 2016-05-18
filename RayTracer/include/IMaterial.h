@@ -19,6 +19,8 @@ class IMaterial
         virtual ~IMaterial() {}
         virtual Color RenderMaterial(IGeometryHierarchy& hierarchy, CollisionData* data, std::vector<PointLight*>& lights, RenderConfig& config, LightReference& reference) = 0;
         virtual Color GetSelfColor() = 0;
+        virtual float GetAlpha() const = 0;
+        virtual float GetN() const = 0;
 };
 
 #endif

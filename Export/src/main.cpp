@@ -9,6 +9,7 @@ int main( int argc, char **argv )
     if(argc < 4)
     {
         std::cerr << "Not enough arguments" << std::endl;
+        std::cout << "Usage: Export CONFIG_FILE SCENE_FILE RESULT_PATH\n" << std::endl;
         exit(1);
     }
     Kernel* kernel = RayTracerFactory::Instance()->GetKernel(argv[1], argv[2]);

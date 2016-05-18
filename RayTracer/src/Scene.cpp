@@ -130,7 +130,7 @@ void Scene::RenderPixel(unsigned int x, unsigned int y)
     collision->PhotonDirection = photon.Direction();
     collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
     view_->UpdatePixel(x, y, collision->PixelColor);
-    /*x = 620; y = 360;
+    /*x = 320; y = 75;
     photon = camera_.GetPhotonForPixel(x, y);
     collision = hierarchy_->RenderPhoton(photon);
     if(!collision->IsCollide)

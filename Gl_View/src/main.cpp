@@ -32,6 +32,7 @@ int main( int argc, char **argv )
     if(argc < 4)
     {
         std::cerr << "No scene file to render" << std::endl;
+        std::cout << "Usage: GL_View WIDTH HEIGHT CONFIG_FILE SCENE_FILE\n" << std::endl;
         exit(1);
     }
     Kernel* kernel = RayTracerFactory::Instance()->GetKernel(argv[3], argv[4]);

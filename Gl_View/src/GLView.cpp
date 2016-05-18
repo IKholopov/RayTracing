@@ -20,6 +20,12 @@ GLView::~GLView()
 void GLView::UpdatePixel(unsigned int x, unsigned int y, Color color)
 {
     std::unique_lock<std::mutex> lock_gurad(matrixLock_);
+    if(color.B > 1)
+        color.B = 1;
+    if(color.R > 1)
+        color.R = 1;
+    if(color.G > 1)
+        color.G = 1;
     data[3*(resolution_.Width*y + x) + 0] = color.R;
     data[3*(resolution_.Width*y + x) + 1] = color.G;
     data[3*(resolution_.Width*y + x) + 2] = color.B;
