@@ -34,3 +34,18 @@ void Camera::SetResolution(Resolution resolution)
 {
     this->resolution_ = resolution;
 }
+
+Plane Camera::screen() const
+{
+    return screen_;
+}
+
+Point Camera::GetViewpoint() const
+{
+    return viewpoint_;
+}
+
+Plane Camera::GetScreen() const
+{
+    return this->screen();
+}

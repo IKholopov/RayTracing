@@ -8,6 +8,7 @@ class CustomSerializer : public ISerializer
 {
     public:
         Scene* LoadScene(std::string filepath, IView* view);
+        void ExportScene(std::string filepath, Scene* scene);
 };
 
 #endif

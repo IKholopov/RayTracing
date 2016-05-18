@@ -95,6 +95,16 @@ bool Polygon::GetCollision(Photon photon, CollisionData& collision)
     return false;
 }
 
+std::__cxx11::string Polygon::GetType() const
+{
+    return "polygon";
+}
+
+IMaterial*Polygon::GetPrimeMaterial() const
+{
+    return this->outterMaterial_;
+}
+
 void Polygon::SetOutterMaterial(IMaterial* material)
 {
     this->outterMaterial_ = material;
@@ -144,7 +154,32 @@ void Polygon::ApplyTransform(Transform A)
     boundingBox_ = Box(XMax, XMin, YMax, YMin, ZMax, ZMin);
 }
 
+void Polygon::ApplyOutterMaterial(IMaterial* material)
+{
+    this->outterMaterial_ = material;
+}
+
+void Polygon::ApplyInnerMaterial(IMaterial* material)
+{
+    this->innerMaterial_ = material;
+}
+
 Point Polygon::GetNormal()
 {
     return ((p2_ - p1_) ^ (p3_ - p1_)).Normalized();
+}
+
+Point Polygon::p3() const
+{
+    return p3_;
+}
+
+Point Polygon::p2() const
+{
+    return p2_;
+}
+
+Point Polygon::p1() const
+{
+    return p1_;
 }

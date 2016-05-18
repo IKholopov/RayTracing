@@ -27,6 +27,11 @@ struct Color
         Color operator + (Color& a);
         Color operator + (Color&& a);
         Color operator * (float a);
+        friend std::ostream& operator<<( std::ostream& output, const Color& p)
+        {
+            output << p.R << " " << p.G << " " << p.B;
+            return output;
+        }
 };
 
 struct Point

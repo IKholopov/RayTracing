@@ -7,8 +7,8 @@
 #include "SimpleSerializer.h"
 #include "STLBinarySerializer.h"
 
-const unsigned int W = 1280;
-const unsigned int H = 720;
+unsigned int W;
+unsigned int H;
 
 GLView* view;
 
@@ -21,23 +21,25 @@ void display()
     glDrawPixels( W, H, GL_RGB, GL_FLOAT, view->GetData());
 
     glutSwapBuffers();
-    glutPostRedisplay ();
+    glutPostRedisplay();
 }
 
 int main( int argc, char **argv )
 {
+    W = atoi(argv[1]);
+    H = atoi(argv[2]);
     view = new GLView(W, H);
-    if(argc < 2)
+    if(argc < 4)
     {
         std::cerr << "No scene file to render" << std::endl;
         exit(1);
     }
-    Kernel* kernel = RayTracerFactory::Instance()->GetKernel(argv[1], argv[2]);
+    Kernel* kernel = RayTracerFactory::Instance()->GetKernel(argv[3], argv[4]);
     kernel->SetView(view);
     kernel->Run();
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
-    glutInitWindowSize( W, H );
+    glutInitWindowSize(W, H);
     glutCreateWindow( "RayTracer" );
     glutDisplayFunc( display );
     glutMainLoop();

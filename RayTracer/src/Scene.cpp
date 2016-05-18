@@ -1,11 +1,15 @@
 #include "Scene.h"
 
-Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights):camera_(camera), view_(view),
-    hierarchy_(hierarchy), lights_(lights), reference_(LightReference(1, 100))
+#include <iostream>
+
+Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy,
+             std::vector<PointLight*> lights, std::vector<ISceneObject*> objects, std::vector<IMaterial*> materials):camera_(camera), view_(view),
+    hierarchy_(hierarchy), lights_(lights), reference_(LightReference(1, 100)), objects_(objects), materials_(materials)
 {}
 
-Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights, LightReference reference):camera_(camera), view_(view),
-    hierarchy_(hierarchy), lights_(lights), reference_(reference)
+Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights,
+             LightReference reference, std::vector<ISceneObject*> objects, std::vector<IMaterial*> materials): camera_(camera), view_(view),
+    hierarchy_(hierarchy), lights_(lights), reference_(reference), objects_(objects), materials_(materials)
 {}
 
 void RenderPixelTask(Scene* scene,
@@ -16,7 +20,10 @@ void RenderPixelTask(Scene* scene,
 
 void Scene::RenderScene()
 {
-    ThreadPool pool(2);//std::thread::hardware_concurrency());
+    std::cout << "Building geometry hierarchy" << std::endl;
+    this->hierarchy_->Initialize(this->objects_);
+    std::cout << "Rendering" << std::endl;
+    ThreadPool pool(std::thread::hardware_concurrency());
     for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
         for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
         {
@@ -106,6 +113,7 @@ void Scene::RenderScene()
     pool.WaitAll();
     delete matrix;
     pool.Terminate();
+    std::cout << "Finished rendering" << std::endl;
 }
 
 void Scene::RenderPixel(unsigned int x, unsigned int y)
@@ -122,7 +130,7 @@ void Scene::RenderPixel(unsigned int x, unsigned int y)
     collision->PhotonDirection = photon.Direction();
     collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
     view_->UpdatePixel(x, y, collision->PixelColor);
-    /*x = 620; y = 357;
+    /*x = 620; y = 360;
     photon = camera_.GetPhotonForPixel(x, y);
     collision = hierarchy_->RenderPhoton(photon);
     if(!collision->IsCollide)
@@ -146,6 +154,31 @@ void Scene::SetView(IView* view)
 void Scene::SetConfig(RenderConfig config)
 {
     this->config_ = config;
+}
+
+const std::vector<ISceneObject*>& Scene::GetGeometry() const
+{
+    return this->objects_;
+}
+
+const std::vector<PointLight*>&Scene::GetLights() const
+{
+    return this->lights_;
+}
+
+const std::vector<IMaterial*>&Scene::GetMaterials() const
+{
+    return this->materials_;
+}
+
+const Camera&Scene::GetCamera() const
+{
+    return this->camera_;
+}
+
+const LightReference&Scene::GetLightReference() const
+{
+    return this->reference_;
 }
 
 Color Scene::EmitLights(CollisionData& collision)

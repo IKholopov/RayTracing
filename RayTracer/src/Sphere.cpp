@@ -17,6 +17,16 @@ const Box& Sphere::GetBoundingBox() const
     return boundingBox_;
 }
 
+std::__cxx11::string Sphere::GetType() const
+{
+    return "sphere";
+}
+
+IMaterial*Sphere::GetPrimeMaterial() const
+{
+    return this->outterMaterial_;
+}
+
 bool Sphere::GetCollision(Photon photon, CollisionData& collision)
 {
     auto centDist = position_ - photon.Position();
@@ -34,7 +44,7 @@ bool Sphere::GetCollision(Photon photon, CollisionData& collision)
     auto sinus = std::sqrt(1 - heightLen2 / radius_ / radius_);
     collision.IsCollide = true;
     collision.Owner = this;
-    if(centDist.Length() > radius_)
+    if(centDist.Length() > radius_ || IsFloatZero(radius_ - centDist.Length()))
     {
         intersecPoint = heightPoint - photon.Direction().Normalized() * sinus * radius_;
         intersecNormal = (intersecPoint - position_).Normalized();
@@ -74,4 +84,24 @@ void Sphere::SetInnerMaterial(IMaterial* material)
 void Sphere::ApplyTransform(Transform A)
 {
     this->position_ = A.Apply(this->position_);
+}
+
+void Sphere::ApplyOutterMaterial(IMaterial* material)
+{
+    this->outterMaterial_ = material;
+}
+
+void Sphere::ApplyInnerMaterial(IMaterial* material)
+{
+    this->innerMaterial_ = material;
+}
+
+Point Sphere::GetPosition() const
+{
+    return position_;
+}
+
+float Sphere::GetRadius() const
+{
+    return radius_;
 }

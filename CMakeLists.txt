@@ -7,5 +7,5 @@ add_subdirectory(SyncContainer)
 add_subdirectory(ThreadPool)
 add_subdirectory(RayTracer)
 add_subdirectory(Gl_View)
+add_subdirectory(Export)
 add_subdirectory(UnitTests)
-

@@ -9,6 +9,7 @@ class STLBinarySerializer : public ISerializer
     public:
         Scene* LoadScene(std::string filepath, IView* view);
         Model* LoadModel(std::string filepath);
+        void ExportScene(std::string filepath, Scene* scene);
 };
 
 #endif

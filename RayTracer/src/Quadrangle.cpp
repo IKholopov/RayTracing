@@ -106,6 +106,16 @@ bool Quadrangle::GetCollision(Photon photon, CollisionData& collision)
     return false;
 }
 
+std::__cxx11::string Quadrangle::GetType() const
+{
+    return "quadrangle";
+}
+
+IMaterial*Quadrangle::GetPrimeMaterial() const
+{
+    return this->outterMaterial_;
+}
+
 void Quadrangle::SetOutterMaterial(IMaterial* material)
 {
     this->outterMaterial_ = material;
@@ -124,7 +134,37 @@ void Quadrangle::ApplyTransform(Transform A)
     p4_ = A.Apply(p4_);
 }
 
+void Quadrangle::ApplyOutterMaterial(IMaterial* material)
+{
+    this->outterMaterial_ = material;
+}
+
+void Quadrangle::ApplyInnerMaterial(IMaterial* material)
+{
+    this->innerMaterial_ = material;
+}
+
 Point Quadrangle::GetNormal()
 {
     return ((p2_- p1_) ^ (p3_ - p1_)).Normalized();
+}
+
+Point Quadrangle::p4() const
+{
+    return p4_;
+}
+
+Point Quadrangle::p3() const
+{
+    return p3_;
+}
+
+Point Quadrangle::p2() const
+{
+    return p2_;
+}
+
+Point Quadrangle::p1() const
+{
+    return p1_;
 }

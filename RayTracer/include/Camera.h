@@ -13,6 +13,12 @@ class Camera
         unsigned int GetHeight();
         Photon GetPhotonForPixel(unsigned int x, unsigned int y);
         void SetResolution(Resolution resolution);
+        Plane screen() const;
+
+        Point GetViewpoint() const;
+        Plane GetScreen() const;
+        //void setViewpoint(const Point& viewpoint);
+
     private:
         Point viewpoint_;
         Plane screen_;

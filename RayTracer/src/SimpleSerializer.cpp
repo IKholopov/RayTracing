@@ -29,6 +29,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
     }
     Camera* camera = nullptr;
     std::vector<ISceneObject*> objects;
+    std::vector<IMaterial*> materials;
     std::vector<PointLight*> lights;
     std::string s;
     bool sRead = false;
@@ -66,6 +67,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("outMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 sphere->SetOutterMaterial(material);
             }
             else{
@@ -77,6 +79,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("inMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 sphere->SetInnerMaterial(material);
             }
             else{
@@ -95,6 +98,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("outMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 pol->SetOutterMaterial(material);
             }
             else{
@@ -106,6 +110,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("inMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 pol->SetInnerMaterial(material);
             }
             else{
@@ -124,6 +129,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("outMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 pal->SetOutterMaterial(material);
             }
             else{
@@ -135,6 +141,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("inMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 pal->SetInnerMaterial(material);
             }
             else{
@@ -153,6 +160,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("outMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 quad->SetOutterMaterial(material);
             }
             else{
@@ -164,6 +172,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
             if(!s.compare("inMaterial"))
             {
                 IMaterial* material = LoadMaterial(stream);
+                materials.push_back(material);
                 quad->SetInnerMaterial(material);
             }
             else{
@@ -185,8 +194,13 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
         }
     }
     auto tree = new KDFairTree(10);
-    tree->Initialize(objects);
-    return new Scene(*camera, view, tree, lights);
+    //tree->Initialize(objects);
+    return new Scene(*camera, view, tree, lights, objects, materials);
+}
+
+void SimpleSerializer::ExportScene(std::__cxx11::string filepath, Scene* scene)
+{
+
 }
 
 IMaterial* SimpleSerializer::LoadMaterial(std::ifstream& stream)

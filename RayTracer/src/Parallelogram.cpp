@@ -107,6 +107,16 @@ bool Parallelogram::GetCollision(Photon photon, CollisionData& collision)
     return false;
 }
 
+std::__cxx11::string Parallelogram::GetType() const
+{
+    return "parallelogram";
+}
+
+IMaterial*Parallelogram::GetPrimeMaterial() const
+{
+    return this->outterMaterial_;
+}
+
 void Parallelogram::SetOutterMaterial(IMaterial* material)
 {
     this->outterMaterial_ = material;
@@ -122,6 +132,16 @@ void Parallelogram::ApplyTransform(Transform A)
     pivot_ = A.Apply(pivot_);
     left_ = A.Apply(left_);
     right_ = A.Apply(right_);
+}
+
+void Parallelogram::ApplyOutterMaterial(IMaterial* material)
+{
+    this->outterMaterial_ = material;
+}
+
+void Parallelogram::ApplyInnerMaterial(IMaterial* material)
+{
+    this->innerMaterial_ = material;
 }
 
 Point Parallelogram::GetNormal()

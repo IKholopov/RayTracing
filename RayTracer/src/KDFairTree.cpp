@@ -212,7 +212,8 @@ CollisionData*KDFairTree::CollideNode(KDFairTree::KDFairNode* node, const Photon
     for(auto obj: node->objects)
     {
         CollisionData data(false);
-        if(obj->GetCollision(photon, data) && photon.Owner() != obj &&
+        if(obj->GetCollision(photon, data) && (photon.Owner() != obj  || (!obj->GetType().compare("sphere")) &&
+                                               !IsFloatZero((photon.Position() - data.CollisionPoint).Length())) &&
                 node->box.IsInside(data.CollisionPoint) &&
                 (!minCollision->IsCollide || (data.CollisionPoint - photon.Position()).Length() <
                  (minCollision->CollisionPoint - photon.Position()).Length()))

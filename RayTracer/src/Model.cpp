@@ -22,3 +22,12 @@ void Model::ApplyTransformation(Transform A)
         obj->ApplyTransform(A);
     }
 }
+
+void Model::ApplyMaterial(IMaterial* material)
+{
+    for(auto obj: polygons_)
+    {
+        obj->ApplyOutterMaterial(material);
+        obj->ApplyInnerMaterial(material);
+    }
+}

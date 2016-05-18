@@ -15,12 +15,20 @@ class Kernel
         ~Kernel();
         void Run();
         void RunScene();
+        void WaitForRender();
+        void ExportScene(ISerializer* serializer, std::string sceneFilePath);
         void LoadScene(ISerializer* serializer, std::string sceneFilePath);
         void SetView(IView* view);
         void SetConfig(RenderConfig config);
     private:
+        enum SceneStatus
+        {
+            NotLoaded, Loaded, Rendering, Rendered
+        };
+
         IView* view_;
         Scene* scene_;
+        SceneStatus sceneStatus_;
         std::thread* thr;
 };
 

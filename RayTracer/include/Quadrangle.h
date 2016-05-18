@@ -11,9 +11,21 @@ class Quadrangle : public ISceneObject
                 IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
         const Box& GetBoundingBox() const;
         bool GetCollision(Photon photon, CollisionData& collision);
+        std::string GetType() const;
+        IMaterial* GetPrimeMaterial() const;
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);
         void ApplyTransform(Transform A);
+        void ApplyOutterMaterial(IMaterial* material);
+        void ApplyInnerMaterial(IMaterial* material);
+        Point p1() const;
+
+        Point p2() const;
+
+        Point p3() const;
+
+        Point p4() const;
+
     private:
         Point GetNormal();
         Point p1_;

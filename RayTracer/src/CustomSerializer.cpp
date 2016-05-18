@@ -350,6 +350,7 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                 {
                     bool finishedModel = false;
                     std::string modelname;
+                    std::string materialId;
                     Point move;
                     Model* model;
                     while(!stream.eof())
@@ -366,10 +367,15 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
                         }
                         else if(!str.compare("move"))
                             l >> move;
+                        else if(!str.compare("material"))
+                        {
+                            l >> materialId;
+                        }
                         else if(!str.compare("endstlmodel"))
                         {
                             finishedModel = true;
                             model->ApplyTransformation(Transform::Move(move));
+                            model->ApplyMaterial(materials.at(materialId));
                             objects.insert(objects.end(), model->GetGeometry().begin(), model->GetGeometry().end());
                             break;
                         }
@@ -395,6 +401,96 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
     }
 
     auto tree = new KDFairTree(15);//KDTree(10.0, 1.0);//
-    tree->Initialize(objects);
-    return new Scene(*camera, view, tree, lights, reference);
+    std::vector<IMaterial*> materialArray;
+    for(auto mat: materials)
+        materialArray.emplace_back(mat.second);
+    return new Scene(*camera, view, tree, lights, reference, objects, materialArray);
+}
+
+void CustomSerializer::ExportScene(std::__cxx11::string filepath, Scene* scene)
+{
+    std::ofstream file(filepath.c_str());
+    if(!file.is_open())
+        std::cerr << "Can't create export file" << std::endl;
+    file << "viewport\n";
+    auto cam = scene->GetCamera();
+    auto origin = cam.GetViewpoint();
+    auto plane = cam.GetScreen();
+    file << "\torigin " << origin << std::endl;
+    file << "\ttopleft " << plane.x1y1z1 << "\n\tbottomleft " << plane.x3y3z3 << "\n\ttopright " << plane.x2y2z2 << std::endl;
+    file << "endviewport\n";
+    file << "materials\n";
+    auto materials = scene->GetMaterials();
+    for(int i = 0; i < materials.size(); ++i)
+    {
+        file << "\tentry\n";
+        file << "\t\tname " << i << std::endl;
+        auto color = materials[i]->GetSelfColor();
+        file << "\t\tcolor " << ((int)255*color.R) << " " << ((int)255*color.G) << " " << ((int)255*color.B) << std::endl;
+        file << "\t\treflect " << materials[i]->GetAlpha() << std::endl;
+        file << "\t\trefract " << materials[i]->GetN() << std::endl;
+        file << "\tendentry\n";
+    }
+    file << "endmaterials\n";
+    file << "lights\n";
+    file << "\treference\n";
+    file << "\t\tpower " << scene->GetLightReference().GetIntensity() << std::endl;
+    file << "\t\tdistance " << scene->GetLightReference().GetDistance() << std::endl;
+    file << "\tendreference\n";
+    auto lights = scene->GetLights();
+    for(auto light: lights)
+    {
+        file << "\tpoint\n";
+        file << "\t\tcoords " << light->GetPosition() << std::endl;;
+        file << "\t\tpower " << light->GetIntensity() << std::endl;;
+        file << "\tendpoint\n";
+    }
+    file << "endlights\n";
+    auto geometry = scene->GetGeometry();
+    file << "geometry\n";
+    for(auto obj: geometry)
+    {
+        if(!obj->GetType().compare("sphere"))
+        {
+            file << "\tsphere\n";
+            file << "\t\tcoords " << ((Sphere*)obj)->GetPosition() << std::endl;
+            file << "\t\tradius " << ((Sphere*)obj)->GetRadius() << std::endl;
+        }
+        else if(!obj->GetType().compare("polygon"))
+        {
+            file << "\ttriangle\n";
+            file << "\t\tvertex " << ((Polygon*)obj)->p1() << std::endl;
+            file << "\t\tvertex " << ((Polygon*)obj)->p2() << std::endl;
+            file << "\t\tvertex " << ((Polygon*)obj)->p3() << std::endl;
+        }
+        else if(!obj->GetType().compare("quadrangle"))
+        {
+            file << "\tquadrangle\n";
+            file << "\t\tvertex " << ((Quadrangle*)obj)->p1() << std::endl;
+            file << "\t\tvertex " << ((Quadrangle*)obj)->p2() << std::endl;
+            file << "\t\tvertex " << ((Quadrangle*)obj)->p3() << std::endl;
+            file << "\t\tvertex " << ((Quadrangle*)obj)->p4() << std::endl;
+        }
+        int i = 0;
+        for(i = 0; i < materials.size(); ++i)
+        {
+            if(materials[i] == obj->GetPrimeMaterial())
+                break;
+        }
+        file << "\t\tmaterial " << i << std::endl;
+        if(!obj->GetType().compare("sphere"))
+        {
+            file << "\tendsphere\n";
+        }
+        else if(!obj->GetType().compare("polygon"))
+        {
+            file << "\tendtriangle\n";
+        }
+        else if(!obj->GetType().compare("quadrangle"))
+        {
+            file << "\tendquadrangle\n";
+        }
+    }
+    file << "endgeometry\n";
+    file.close();
 }

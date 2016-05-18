@@ -11,9 +11,13 @@ class Parallelogram : public ISceneObject
                 IMaterial* outterMaterial = nullptr, IMaterial* innerMaterial = nullptr);
         const Box& GetBoundingBox() const;
         bool GetCollision(Photon photon, CollisionData& collision);
+        std::string GetType() const ;
+        IMaterial* GetPrimeMaterial() const;
         void SetOutterMaterial(IMaterial* material);
         void SetInnerMaterial(IMaterial* material);
         void ApplyTransform(Transform A);
+        void ApplyOutterMaterial(IMaterial* material);
+        void ApplyInnerMaterial(IMaterial* material);
     private:
         Point GetNormal();
         Point pivot_;
