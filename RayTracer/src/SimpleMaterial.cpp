@@ -30,11 +30,12 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
         }
         else
             data->PixelColor = Color(0, 0, 0);
+        delete refract;
     }
     else
     {
         data->PixelColor = data->PixelColor.RGBtoHSV();
-        if(IsFloatZero(this->alpha_) || data->ReflectionDepth > config.reflectionDepth())
+        if(IsFloatZero(this->alpha_) || !config.reflection()|| data->ReflectionDepth > config.reflectionDepth())
         {
                 if(config.light())
                 {
@@ -46,7 +47,6 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
                 }
                 else
                     data->PixelColor = data->PixelColor.HSVtoRGB();
-                return data->PixelColor;
         }
         else
         {
@@ -71,6 +71,7 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
         else
             reflection->PixelColor = Color(0, 0, 0);
         data->PixelColor = reflection->PixelColor*alpha_ + data->PixelColor*(1 - alpha_);
+        delete reflection;
     }
     return data->PixelColor;
 }

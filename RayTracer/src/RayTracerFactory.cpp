@@ -21,17 +21,27 @@ Kernel*RayTracerFactory::GetKernel(std::__cxx11::string configPath, std::string 
     }
     std::string s;
     RenderConfig renderConfig;
+    ISerializer* serializer = nullptr;
     while(!config.eof())
     {
         config >> s;
-        if(!s[0] == '#')
+        if(s[0] == '#')
             continue;
         if(!s.compare("SimpleSerializer"))
-            kernel->LoadScene(new SimpleSerializer(), scenePath);
+        {
+            serializer = new SimpleSerializer();
+            kernel->LoadScene(serializer, scenePath);
+        }
         else if(!s.compare("STLBinarySerializer"))
-            kernel->LoadScene(new STLBinarySerializer(), scenePath);
+        {
+            serializer = new STLBinarySerializer();
+            kernel->LoadScene(serializer, scenePath);
+        }
         else if(!s.compare("CustomSerializer"))
-            kernel->LoadScene(new CustomSerializer(), scenePath);
+        {
+            serializer = new CustomSerializer();
+            kernel->LoadScene(serializer, scenePath);
+        }
         else if(!s.compare("disableLight"))
             renderConfig.setLight(false);
         else if(!s.compare("disableReflection"))
@@ -52,6 +62,8 @@ Kernel*RayTracerFactory::GetKernel(std::__cxx11::string configPath, std::string 
         }
     }
     kernel->SetConfig(renderConfig);
+    if(serializer)
+        delete serializer;
     return kernel;
 }
 

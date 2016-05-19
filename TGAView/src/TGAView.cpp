@@ -13,7 +13,7 @@ TGAView::TGAView(unsigned int width, unsigned int height):resolution_(Resolution
         {
             data[width*y*3+x*3] = 0.0f;
             data[width*y*3+x*3 + 1] = 0.0f;
-            data[width*y*3+x*3 + 2] = 1.0f;
+            data[width*y*3+x*3 + 2] = 0.0f;
         }
 }
 

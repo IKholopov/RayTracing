@@ -33,7 +33,7 @@ Color PointLight::EmitLight(CollisionData& collision, IGeometryHierarchy& hierar
     }
     delete collData;
     Color lColor = this->GetLight().RGBtoHSV();
-    lColor.B *= std::fabs((this->GetIntensity() * std::pow(reference.GetDistance(), 2) * original.RGBtoHSV().B / std::pow((this->GetPosition() - collision.CollisionPoint).Length(),2))*
+    lColor.B *= std::fabs((this->GetIntensity() / reference.GetIntensity() * std::pow(reference.GetDistance(), 2) * original.RGBtoHSV().B / std::pow((this->GetPosition() - collision.CollisionPoint).Length(),2))*
         (collision.CollisionNormal.Normalized()*photon.Direction().Normalized()));
 
     c = c + lColor;

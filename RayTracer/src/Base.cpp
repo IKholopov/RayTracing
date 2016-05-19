@@ -208,7 +208,7 @@ Color Color::RGBtoHSV() {
     V = maxComp;
 
     if(H < 0) {
-        H +-360;
+        H += 360;
     }
     return Color(H, S, V);
 }

@@ -17,7 +17,6 @@ class Camera
 
         Point GetViewpoint() const;
         Plane GetScreen() const;
-        //void setViewpoint(const Point& viewpoint);
 
     private:
         Point viewpoint_;

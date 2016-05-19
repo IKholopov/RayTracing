@@ -2,15 +2,27 @@
 
 #include <iostream>
 
-Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy,
+Scene::Scene(Camera* camera, IView* view, IGeometryHierarchy* hierarchy,
              std::vector<PointLight*> lights, std::vector<ISceneObject*> objects, std::vector<IMaterial*> materials):camera_(camera), view_(view),
     hierarchy_(hierarchy), lights_(lights), reference_(LightReference(1, 100)), objects_(objects), materials_(materials)
 {}
 
-Scene::Scene(Camera camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights,
+Scene::Scene(Camera* camera, IView* view, IGeometryHierarchy* hierarchy, std::vector<PointLight*> lights,
              LightReference reference, std::vector<ISceneObject*> objects, std::vector<IMaterial*> materials): camera_(camera), view_(view),
     hierarchy_(hierarchy), lights_(lights), reference_(reference), objects_(objects), materials_(materials)
 {}
+
+Scene::~Scene()
+{
+    delete hierarchy_;
+    delete camera_;
+    for(auto mat: materials_)
+        delete mat;
+    for(auto obj: objects_)
+        delete obj;
+    for(auto light: lights_)
+        delete light;
+}
 
 void RenderPixelTask(Scene* scene,
                  unsigned int x, unsigned int y)
@@ -24,8 +36,8 @@ void Scene::RenderScene()
     this->hierarchy_->Initialize(this->objects_);
     std::cout << "Rendering" << std::endl;
     ThreadPool pool(std::thread::hardware_concurrency());
-    for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
-        for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
+    for(unsigned int x = 0; x < camera_->GetWidth(); ++x)
+        for(unsigned int y = 0; y < camera_->GetHeight(); ++y)
         {
             pool.AddTask([this, x, y](){
                 RenderPixelTask(this, x, y);
@@ -33,8 +45,8 @@ void Scene::RenderScene()
         }
     Color* matrix = new Color[view_->GetResolution().Height*view_->GetResolution().Width];
     pool.WaitAll();
-    for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
-        for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
+    for(unsigned int x = 0; x < camera_->GetWidth(); ++x)
+        for(unsigned int y = 0; y < camera_->GetHeight(); ++y)
         {
             pool.AddTask([this, x, y, &matrix](){
                 float power = 8;
@@ -103,22 +115,22 @@ void Scene::RenderScene()
             });
         }
     pool.WaitAll();
-    for(unsigned int x = 0; x < camera_.GetWidth(); ++x)
-        for(unsigned int y = 0; y < camera_.GetHeight(); ++y)
+    for(unsigned int x = 0; x < camera_->GetWidth(); ++x)
+        for(unsigned int y = 0; y < camera_->GetHeight(); ++y)
         {
             pool.AddTask([this, x, y, &matrix](){
                 this->view_->UpdatePixel(x,y, matrix[(view_->GetResolution().Width*y + x)]);
             });
         }
     pool.WaitAll();
-    delete matrix;
     pool.Terminate();
+    delete[] matrix;
     std::cout << "Finished rendering" << std::endl;
 }
 
 void Scene::RenderPixel(unsigned int x, unsigned int y)
 {
-    auto photon = camera_.GetPhotonForPixel(x, y);
+    auto photon = camera_->GetPhotonForPixel(x, y);
     auto collision = hierarchy_->RenderPhoton(photon);
     if(!collision->IsCollide)
     {
@@ -130,25 +142,12 @@ void Scene::RenderPixel(unsigned int x, unsigned int y)
     collision->PhotonDirection = photon.Direction();
     collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
     view_->UpdatePixel(x, y, collision->PixelColor);
-    /*x = 320; y = 75;
-    photon = camera_.GetPhotonForPixel(x, y);
-    collision = hierarchy_->RenderPhoton(photon);
-    if(!collision->IsCollide)
-    {
-        view_->UpdatePixel(x, y, Color(1, 0, 0));
-        return;
-    }
-    collision->ReflectionDepth = 0;
-    collision->RefractionDepth = 0;
-    collision->PhotonDirection = photon.Direction();
-    collision->Material->RenderMaterial(*hierarchy_, collision, this->lights_, config_, reference_);
-    view_->UpdatePixel(x, y, Color(1, 0, 0));*/
 }
 
 void Scene::SetView(IView* view)
 {
     this->view_ = view;
-    this->camera_.SetResolution(view->GetResolution());
+    this->camera_->SetResolution(view->GetResolution());
 }
 
 void Scene::SetConfig(RenderConfig config)
@@ -171,7 +170,7 @@ const std::vector<IMaterial*>&Scene::GetMaterials() const
     return this->materials_;
 }
 
-const Camera&Scene::GetCamera() const
+const Camera* Scene::GetCamera() const
 {
     return this->camera_;
 }

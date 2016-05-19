@@ -9,8 +9,8 @@ class KDFairTree: public IGeometryHierarchy
 {
     public:
         KDFairTree(int emptySpaceCost);
+        ~KDFairTree();
         void Initialize(std::vector<ISceneObject*>& objects);
-        CollisionData* CollidePhoton(const Photon& photon);
         CollisionData* CheckCollide(const Photon& photon);
         CollisionData* RenderPhoton(Photon photon);
         unsigned int Size();
@@ -34,6 +34,7 @@ class KDFairTree: public IGeometryHierarchy
         };
         struct KDFairNode{
             KDFairNode() {}
+            ~KDFairNode();
             float plane;
             bool leaf;
             KDFairNode* left;
@@ -45,10 +46,8 @@ class KDFairTree: public IGeometryHierarchy
         };
 
         CollisionData*CheckCollideNode(KDFairTree::KDFairNode* node, const Photon& photon);
-        KDFairNode* DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis, bool divideByMax);
-        //KDFairNode* DivideAndBuild(std::vector<ISceneObject*>& objects, Box box, int depth, Axis axis, bool divideByMax);
+        KDFairNode* DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis);
         CollisionData* CollideNode(KDFairNode* node, const Photon& photon);
-        //bool CheckCollide(KDFairNode* node, const Photon& photon);
         KDFairNode* root_;
         Box primaryBox_;
         float emptySpaceCost_;

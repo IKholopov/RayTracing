@@ -1,4 +1,4 @@
-project(GL_View)
+project(Gl_View)
 find_package (Threads)
 set(LINK_FLAGS " -lGL -lGLEW -lglut")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")

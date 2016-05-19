@@ -195,7 +195,7 @@ Scene* SimpleSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
     }
     auto tree = new KDFairTree(10);
     //tree->Initialize(objects);
-    return new Scene(*camera, view, tree, lights, objects, materials);
+    return new Scene(camera, view, tree, lights, objects, materials);
 }
 
 void SimpleSerializer::ExportScene(std::__cxx11::string filepath, Scene* scene)

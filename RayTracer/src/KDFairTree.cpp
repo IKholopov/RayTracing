@@ -50,6 +50,11 @@ KDFairTree::KDFairTree(int depth):depth_(depth)
 {
 }
 
+KDFairTree::~KDFairTree()
+{
+    delete this->root_;
+}
+
 void KDFairTree::Initialize(std::vector<ISceneObject*>& objects)
 {
     if(objects.size() == 0)
@@ -76,7 +81,7 @@ void KDFairTree::Initialize(std::vector<ISceneObject*>& objects)
     }
     this->primaryBox_ = primaryBox;
     SortedArrays arrays(objects);
-    root_ = DivideAndBuild(arrays, primaryBox, 1, Axis::A_X, 1);
+    root_ = DivideAndBuild(arrays, primaryBox, 1, Axis::A_X);
 }
 
 CollisionData* KDFairTree::CheckCollide(const Photon& photon)
@@ -84,12 +89,12 @@ CollisionData* KDFairTree::CheckCollide(const Photon& photon)
     return CheckCollideNode(this->root_, photon);
 }
 
-KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis, bool divideByMax)
+KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis)
 {
     auto node = new KDFairNode();
     node->box = box;
     node->size = objects.GetSortedMax(Axis::A_X).size();
-    if(objects.GetSortedMax(Axis::A_X).size() < 4)
+    if(objects.GetSortedMax(Axis::A_X).size() < 10)
     {
         node->leaf = true;
         for(auto obj: objects.GetSortedMax(Axis::A_X))
@@ -98,7 +103,13 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
     }
     float optimalSplit ;
     if(depth > 9)
-        optimalSplit = box.GetMid(axis);
+    {
+        optimalSplit = objects.XMax[0]->GetBoundingBox().GetMid(axis) / (float)(objects.XMax.size());
+        for(auto obj: objects.XMax)
+        {
+            optimalSplit += obj->GetBoundingBox().GetMid(axis) / (float)(objects.XMax.size());
+        }
+    }
     else {
         std::vector<ISceneObject*>& minSorted = objects.GetSortedMin(axis);
         std::vector<ISceneObject*>& maxSorted = objects.GetSortedMax(axis);
@@ -106,8 +117,6 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
         long rightObjects = maxSorted.size();
         optimalSplit = maxSorted[0]->GetBoundingBox().GetMax(axis);
         float sah = std::numeric_limits<float>::max();
-        //if(divideByMax)
-        //{
             auto minBorder = minSorted.begin();
             for(auto obj = maxSorted.begin(); obj != maxSorted.end() - 1; ++obj)
             {
@@ -127,9 +136,6 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
                     sah = newSah;
                 }
             }
-        /*}
-        else
-        {*/
             rightObjects = objects.XMax.size();
             minBorder = maxSorted.begin();
             for(auto obj = minSorted.begin() + 1; obj != minSorted.end(); ++obj)
@@ -148,12 +154,10 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
                     sah = newSah;
                 }
             }
-        //}
     }
     SortedArrays left, right;
     objects.Split(axis, optimalSplit,left, right);
-    if(depth > this->depth_ || (left.XMax.size() > 0.9*objects.XMin.size() && right.XMax.size() > 0.9*objects.XMin.size()))//|| left.size() == 0 || right.size() == 0 ||
-        //left.size() == objects.size() || right.size() == objects.size())
+    if(depth > 2*this->depth_ || (depth > this->depth_  && (left.XMax.size() == objects.XMax.size() || right.XMax.size() == objects.XMax.size())))
     {
         node->leaf = true;
         for(auto obj: objects.XMax)
@@ -168,8 +172,8 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
     Box rightBox = box;
     rightBox.SetAxisMin(axis, optimalSplit);
 
-    node->left = DivideAndBuild(left, leftBox, depth+1, (Axis)((axis+1)%3), !divideByMax);
-    node->right = DivideAndBuild(right, rightBox, depth+1, (Axis)((axis+1)%3), !divideByMax);
+    node->left = DivideAndBuild(left, leftBox, depth+1, (Axis)((axis+1)%3));
+    node->right = DivideAndBuild(right, rightBox, depth+1, (Axis)((axis+1)%3));
 
     return node;
 }
@@ -338,7 +342,7 @@ std::vector<ISceneObject*>& KDFairTree::SortedArrays::GetSortedMax(Axis axis)
         return this->XMax;
     if(axis == Axis::A_Y)
         return this->YMax;
-    if(axis == Axis::A_Z)
+    else
         return this->ZMax;
 }
 
@@ -348,6 +352,15 @@ std::vector<ISceneObject*>& KDFairTree::SortedArrays::GetSortedMin(Axis axis)
         return this->XMin;
     if(axis == Axis::A_Y)
         return this->YMin;
-    if(axis == Axis::A_Z)
+    else
         return this->ZMin;
+}
+
+KDFairTree::KDFairNode::~KDFairNode()
+{
+    if(!this->leaf)
+    {
+        delete this->left;
+        delete this->right;
+    }
 }

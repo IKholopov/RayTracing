@@ -400,11 +400,11 @@ Scene* CustomSerializer::LoadScene(std::__cxx11::string filepath, IView* view)
         }
     }
 
-    auto tree = new KDFairTree(15);//KDTree(10.0, 1.0);//
+    auto tree = new KDFairTree(10);
     std::vector<IMaterial*> materialArray;
     for(auto mat: materials)
         materialArray.emplace_back(mat.second);
-    return new Scene(*camera, view, tree, lights, reference, objects, materialArray);
+    return new Scene(camera, view, tree, lights, reference, objects, materialArray);
 }
 
 void CustomSerializer::ExportScene(std::__cxx11::string filepath, Scene* scene)
@@ -414,8 +414,8 @@ void CustomSerializer::ExportScene(std::__cxx11::string filepath, Scene* scene)
         std::cerr << "Can't create export file" << std::endl;
     file << "viewport\n";
     auto cam = scene->GetCamera();
-    auto origin = cam.GetViewpoint();
-    auto plane = cam.GetScreen();
+    auto origin = cam->GetViewpoint();
+    auto plane = cam->GetScreen();
     file << "\torigin " << origin << std::endl;
     file << "\ttopleft " << plane.x1y1z1 << "\n\tbottomleft " << plane.x3y3z3 << "\n\ttopright " << plane.x2y2z2 << std::endl;
     file << "endviewport\n";
