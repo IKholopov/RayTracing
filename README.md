@@ -2,6 +2,7 @@
 Simple Ray Tracing
 
 Содержание проекта:
+
 	   1. RayTracing - основная библиотека
 	   2. SyncContainer, ThreadPool - Потокобезопасный контейнер и трэд пулл соответственно. Зависимости - boost unit test framework 
 	   3. GL_View - Отрисовка в реальном времени. Зависимости - glut.
