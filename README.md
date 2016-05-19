@@ -17,9 +17,9 @@ Simple Ray Tracing
     refractionDepth 20 # Глубина преломления
     		       	 SCENE_FILE - файл сцены. Дополнительно поддерживается:
     stlmodel 		        #Модель в формате STL бинарном
-	filename /Absolute/path/to/model.stl
-	move 0 30 5	        #Позиция на сцене
-        material material_id    #Материал
+	    filename /Absolute/path/to/model.stl
+	    move 0 30 5	        #Позиция на сцене
+            material material_id    #Материал
     endstlmodel
        4. TGAView - Рендеринг в картинку формата tga. Использование аналогично Gl_View с доп. параметром - путём для картинки. По дефолту rendered.tga
 	   5. Export - Экспорт из дополненного формата в чистый rt.
