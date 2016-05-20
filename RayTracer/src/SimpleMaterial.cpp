@@ -22,6 +22,7 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
                              (1.0/this->n_), data->Owner);
         auto refract = hierarchy.RenderPhoton(refractPhoton);
         refract->RefractionDepth = data->RefractionDepth + 1;
+        refract->ReflectionDepth = data->ReflectionDepth + 1;
         if(refract->IsCollide)
         {
             refract->PhotonDirection = refractPhoton.Direction();
@@ -54,13 +55,14 @@ Color SimpleMaterial::RenderMaterial(IGeometryHierarchy& hierarchy,
             data->PixelColor = data->PixelColor.HSVtoRGB();
         }
     }
-    if(this->alpha_ > 0 && config.reflection())
+    if(this->alpha_ > 0 && config.reflection() && data->ReflectionDepth < config.reflectionDepth())
     {
         Photon reflectionPhoton(data->CollisionPoint, data->PhotonDirection*(-1) +
                                       (data->PhotonDirection - data->CollisionNormal*
                                        (data->PhotonDirection*data->CollisionNormal.Normalized()))* 2, data->Owner);
         auto reflection = hierarchy.RenderPhoton(reflectionPhoton);
         reflection->ReflectionDepth = data->ReflectionDepth + 1;
+        reflection->RefractionDepth = data->RefractionDepth + 1;
         if(reflection->IsCollide)
         {
             reflection->PhotonDirection = reflectionPhoton.Direction();
