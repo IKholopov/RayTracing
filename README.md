@@ -24,4 +24,12 @@ Simple Ray Tracing
        4. TGAView - Рендеринг в картинку формата tga. Использование аналогично Gl_View с доп. параметром - путём для картинки. По дефолту rendered.tga
 	   5. Export - Экспорт из дополненного формата в чистый rt.
 Примеры конфигурационного файла в корне проекта.
+
+Необходимые пакеты в Ubunut:
+	
+	- libboost-all-dev
+	- freeglut3-dev
+	- libglew-dev
+	- libxmu-dev
+	- libxi-dev
 	
