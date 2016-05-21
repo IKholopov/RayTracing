@@ -25,7 +25,7 @@ Simple Ray Tracing
 	   5. Export - Экспорт из дополненного формата в чистый rt.
 Примеры конфигурационного файла в корне проекта.
 
-Необходимые пакеты в Ubunut:
+Необходимые пакеты в Ubunutu:
 	
 	- libboost-all-dev
 	- freeglut3-dev
