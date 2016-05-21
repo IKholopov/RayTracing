@@ -1,6 +1,7 @@
 #include "KDFairTree.h"
 
 #include <algorithm>
+#include <future>
 
 struct sortXMax
 {
@@ -46,13 +47,14 @@ struct sortZMin
 };
 
 
-KDFairTree::KDFairTree(int depth):depth_(depth)
+KDFairTree::KDFairTree(int depth):depth_(depth), root_(nullptr)
 {
 }
 
 KDFairTree::~KDFairTree()
 {
-    delete this->root_;
+    if(root_)
+        delete this->root_;
 }
 
 void KDFairTree::Initialize(std::vector<ISceneObject*>& objects)
@@ -81,6 +83,7 @@ void KDFairTree::Initialize(std::vector<ISceneObject*>& objects)
     }
     this->primaryBox_ = primaryBox;
     SortedArrays arrays(objects);
+    arrays.Sort();
     root_ = DivideAndBuild(arrays, primaryBox, 1, Axis::A_X);
 }
 
@@ -89,7 +92,7 @@ CollisionData* KDFairTree::CheckCollide(const Photon& photon)
     return CheckCollideNode(this->root_, photon);
 }
 
-KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis)
+KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis, size_t launchedThreads)
 {
     auto node = new KDFairNode();
     node->box = box;
@@ -172,8 +175,19 @@ KDFairTree::KDFairNode* KDFairTree::DivideAndBuild(SortedArrays& objects, Box bo
     Box rightBox = box;
     rightBox.SetAxisMin(axis, optimalSplit);
 
-    node->left = DivideAndBuild(left, leftBox, depth+1, (Axis)((axis+1)%3));
-    node->right = DivideAndBuild(right, rightBox, depth+1, (Axis)((axis+1)%3));
+    if(left.XMax.size() > 10000 && right.XMax.size() > 10000 &&
+            std::thread::hardware_concurrency() >= 2*launchedThreads)
+    {
+        auto handleLeft = std::async(std::launch::async, &KDFairTree::DivideAndBuild, this, std::ref(left), leftBox, depth+1, (Axis)((axis+1)%3), 2*launchedThreads);
+        auto handleRight = std::async(std::launch::async, &KDFairTree::DivideAndBuild, this, std::ref(right), rightBox, depth+1, (Axis)((axis+1)%3),2*launchedThreads);
+        node->left = handleLeft.get();
+        node->right = handleRight.get();
+    }
+    else
+    {
+        node->left = DivideAndBuild(left, leftBox, depth+1, (Axis)((axis+1)%3), launchedThreads);
+        node->right = DivideAndBuild(right, rightBox, depth+1, (Axis)((axis+1)%3), launchedThreads);
+    }
 
     return node;
 }
@@ -281,6 +295,10 @@ KDFairTree::SortedArrays::SortedArrays(std::vector<ISceneObject*>& objects)
     this->YMin = objects;
     this->ZMax = objects;
     this->ZMin = objects;
+}
+
+void KDFairTree::SortedArrays::Sort()
+{
     std::sort(XMax.begin(), XMax.end(), sortXMax());
     std::sort(XMin.begin(), XMin.end(), sortXMin());
     std::sort(YMax.begin(), YMax.end(), sortYMax());
@@ -292,6 +310,18 @@ KDFairTree::SortedArrays::SortedArrays(std::vector<ISceneObject*>& objects)
 void KDFairTree::SortedArrays::Split(Axis axis, float plane, SortedArrays& array1, SortedArrays& array2)
 {
 
+        /*array1.XMax.reserve(this->XMax.size());
+        array1.YMax.reserve(this->XMax.size());
+        array1.ZMax.reserve(this->XMax.size());
+        array1.XMin.reserve(this->XMax.size());
+        array1.YMin.reserve(this->XMax.size());
+        array1.ZMin.reserve(this->XMax.size());
+        array2.XMax.reserve(this->XMax.size());
+        array2.YMax.reserve(this->XMax.size());
+        array2.ZMax.reserve(this->XMax.size());
+        array2.XMin.reserve(this->XMax.size());
+        array2.YMin.reserve(this->XMax.size());
+        array2.ZMin.reserve(this->XMax.size());*/
         for(auto obj: XMax)
         {
             if(obj->GetBoundingBox().GetMin(axis) <= plane)

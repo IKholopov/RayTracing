@@ -28,6 +28,8 @@ class KDFairTree: public IGeometryHierarchy
                 std::vector<ISceneObject*> ZMax;
                 std::vector<ISceneObject*> ZMin;
 
+                void Sort();
+
                 void Split(Axis axis, float plane, SortedArrays& array1, SortedArrays& array2);
                 std::vector<ISceneObject*>& GetSortedMax(Axis axis);
                 std::vector<ISceneObject*>& GetSortedMin(Axis axis);
@@ -46,7 +48,7 @@ class KDFairTree: public IGeometryHierarchy
         };
 
         CollisionData*CheckCollideNode(KDFairTree::KDFairNode* node, const Photon& photon);
-        KDFairNode* DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis);
+        KDFairNode* DivideAndBuild(SortedArrays& objects, Box box, int depth, Axis axis, size_t launchedThreads = 0);
         CollisionData* CollideNode(KDFairNode* node, const Photon& photon);
         KDFairNode* root_;
         Box primaryBox_;
