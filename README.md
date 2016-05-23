@@ -9,7 +9,7 @@ Simple Ray Tracing
 	      Использование ./GL_View WIDTH HEIGHT CONFIG_FILE SCENE_FILE, где
 	      		    WIDTH HEIGHT - размеры изображения
 			        CONFIG_FILE - текстовый файл со следующего вида:
-    CustomSerializer #Формат сцены CustomSerializer - реализация формата rt
+    CustomSerializer #Формат сцены CustomSerializer - реализация формата rt; STLBinarySerializer - бинарный STL
     #disableLight # отключить освещение
     #disableReflection # отключить отражение
     #disableRefraction # отключить преломление
